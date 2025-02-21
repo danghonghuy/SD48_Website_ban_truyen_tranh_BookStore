@@ -4,7 +4,27 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="11af1764-9af2-48a2-aa52-4d559bd1e974" name="Changes" comment="" />
+    <list default="true" id="11af1764-9af2-48a2-aa52-4d559bd1e974" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/backend_comic_service/develop/controller/CouponController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/backend_comic_service/develop/controller/DiscountController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/backend_comic_service/develop/entity/CouponEntity.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/backend_comic_service/develop/entity/DiscountEntity.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/backend_comic_service/develop/model/model/CouponModel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/backend_comic_service/develop/model/model/DiscountModel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/backend_comic_service/develop/repository/CouponRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/backend_comic_service/develop/repository/DiscountRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/backend_comic_service/develop/repository/HomeController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/backend_comic_service/develop/service/ICouponService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/backend_comic_service/develop/service/IDiscountService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/backend_comic_service/develop/service_impl/CouponServiceImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/backend_comic_service/develop/service_impl/DiscountServiceImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/backend_comic_service/develop/validator/CouponValidator.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/backend_comic_service/develop/validator/DiscountValidator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -35,6 +55,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;ducvaph45821&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/danghonghuy/SD48_Website_ban_truyen_tranh_BookStore.git&quot;,
+    &quot;accountId&quot;: &quot;5034d360-59b6-490d-8e04-d19a7bd4df16&quot;
+  }
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 4
 }</component>
@@ -53,10 +85,10 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "Spring Boot.BackendComicServiceApplication.executor": "Run",
-    "git-widget-placeholder": "api__NhanVien__KhachHang",
+    "git-widget-placeholder": "Api__khuyenmai__voucher",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/du_an/SD48_Website_ban_truyen_tranh_BookStore/backend_comic_service",
+    "last_opened_file_path": "C:/Users/ASUS/SD48_Website_ban_truyen_tranh_BookStore/backend_comic_service/src/main/java/com/example/backend_comic_service/develop/model/model",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -68,16 +100,16 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\ASUS\SD48_Website_ban_truyen_tranh_BookStore\backend_comic_service\src\main\java\com\example\backend_comic_service\develop\model\model" />
+      <recent name="C:\Users\ASUS\SD48_Website_ban_truyen_tranh_BookStore\backend_comic_service\src\main\java\com\example\backend_comic_service\develop\validator" />
+      <recent name="C:\Users\ASUS\SD48_Website_ban_truyen_tranh_BookStore\backend_comic_service\src\main\java\com\example\backend_comic_service\develop\service_impl" />
+      <recent name="C:\Users\ASUS\SD48_Website_ban_truyen_tranh_BookStore\backend_comic_service\src\main\java\com\example\backend_comic_service\develop\repository" />
+      <recent name="C:\Users\ASUS\SD48_Website_ban_truyen_tranh_BookStore\backend_comic_service\src\main\java\com\example\backend_comic_service\develop\controller" />
+    </key>
+  </component>
   <component name="RunManager">
-    <configuration default="true" type="JetRunConfigurationType">
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
-      <option name="filePath" />
-      <method v="2" />
-    </configuration>
     <configuration name="BackendComicServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
       <module name="backend_comic_service.main" />
@@ -104,6 +136,10 @@
       <option name="presentableId" value="Default" />
       <updated>1740121961780</updated>
       <workItem from="1740121962933" duration="938000" />
+      <workItem from="1740154245119" duration="99000" />
+      <workItem from="1740154356228" duration="40000" />
+      <workItem from="1740154516014" duration="18000" />
+      <workItem from="1740154653792" duration="1110000" />
     </task>
     <servers />
   </component>
