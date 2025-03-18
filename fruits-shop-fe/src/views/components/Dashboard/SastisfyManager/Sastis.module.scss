@@ -1,0 +1,14 @@
+.progress-bar {
+    flex-direction: column;
+    justify-content: center;
+    color: var(--bs-progress-bar-color);
+    text-align: center;
+    white-space: nowrap;
+    background-color: var(--bs-progress-bar-bg);
+    transition: var(--bs-progress-bar-transition);
+}
+
+.progress, .progress-bar {
+    display: flex;
+    overflow: hidden;
+}
