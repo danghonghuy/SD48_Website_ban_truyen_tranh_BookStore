@@ -1,11 +1,13 @@
 package com.example.backend_comic_service.develop.service_impl;
 
 import com.example.backend_comic_service.develop.entity.PaymentEntity;
+import com.example.backend_comic_service.develop.entity.UserEntity;
 import com.example.backend_comic_service.develop.model.base_response.BaseListResponseModel;
 import com.example.backend_comic_service.develop.model.base_response.BaseResponseModel;
 import com.example.backend_comic_service.develop.model.model.PaymentModel;
 import com.example.backend_comic_service.develop.repository.PaymentRepository;
 import com.example.backend_comic_service.develop.service.IPaymentService;
+import com.example.backend_comic_service.develop.utils.AuthenticationService;
 import com.example.backend_comic_service.develop.utils.UtilService;
 import com.example.backend_comic_service.develop.validator.PaymentValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,18 +16,26 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class PaymentServiceImpl implements IPaymentService {
 
+    private final PaymentRepository paymentRepository;
+    private final PaymentValidator paymentValidator;
+    private final UtilService utilService;
+    private final AuthenticationService authenticationService;
     @Autowired
-    private PaymentRepository paymentRepository;
-    @Autowired
-    private PaymentValidator paymentValidator;
-    @Autowired
-    private UtilService utilService;
+    public PaymentServiceImpl(PaymentRepository paymentRepository, PaymentValidator paymentValidator, UtilService utilService, AuthenticationService authenticationService) {
+        this.paymentRepository = paymentRepository;
+        this.paymentValidator = paymentValidator;
+        this.utilService = utilService;
+        this.authenticationService = authenticationService;
+    }
 
     @Override
     public BaseResponseModel<PaymentModel> addOrChange(PaymentModel paymentModel) {
@@ -48,6 +58,18 @@ public class PaymentServiceImpl implements IPaymentService {
             }else{
                 paymentEntity = paymentModel.toEntity();
             }
+
+            UserEntity userEntity = authenticationService.authenToken();
+            if(userEntity == null){
+                response.errorResponse("Authentication failed");
+                return response;
+            }
+            if(Optional.ofNullable(paymentModel.getId()).orElse(0) <= 0){
+                paymentEntity.setCreatedBy(userEntity.getId());
+                paymentEntity.setCreatedDate(Date.valueOf(LocalDate.now()));
+            }
+            paymentEntity.setUpdatedBy(userEntity.getId());
+            paymentEntity.setUpdatedDate(Date.valueOf(LocalDate.now()));
             PaymentEntity savedPaymentEntity = paymentRepository.saveAndFlush(paymentEntity);
             if(savedPaymentEntity.getId() != null){
                  if(paymentModel.getId() != null){
@@ -91,10 +113,10 @@ public class PaymentServiceImpl implements IPaymentService {
     }
 
     @Override
-    public BaseListResponseModel<List<PaymentModel>> getAllPayments(String keySearch, Pageable pageable) {
+    public BaseListResponseModel<List<PaymentModel>> getAllPayments(String keySearch, Integer status, Pageable pageable) {
         BaseListResponseModel<List<PaymentModel>> response = new BaseListResponseModel<>();
         try{
-            Page<PaymentEntity> paymentEntities = paymentRepository.getListPayments(keySearch, pageable);
+            Page<PaymentEntity> paymentEntities = paymentRepository.getListPayments(keySearch, status, pageable);
             if(paymentEntities.getContent().isEmpty()){
                 response.successResponse(null, "Payment list is empty");
                 return response;
@@ -113,7 +135,7 @@ public class PaymentServiceImpl implements IPaymentService {
     }
 
     @Override
-    public BaseResponseModel<Integer> delete(Integer id) {
+    public BaseResponseModel<Integer> delete(Integer id, Integer status) {
         BaseResponseModel<Integer> response = new BaseResponseModel<>();
         try{
             PaymentEntity paymentEntity = paymentRepository.findById(id).orElse(null);
@@ -121,7 +143,7 @@ public class PaymentServiceImpl implements IPaymentService {
                 response.errorResponse("Payment not exist to update");
                 return response;
             }
-            paymentRepository.updatePayment(paymentEntity.getId());
+            paymentRepository.updatePayment(paymentEntity.getId(), status);
             response.successResponse(id, "Delete successful");
             return response;
         }

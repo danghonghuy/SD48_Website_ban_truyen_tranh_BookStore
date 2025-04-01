@@ -1,5 +1,8 @@
 package com.example.backend_comic_service.develop.configs.configs_sercurity_service;
 
+import com.example.backend_comic_service.develop.exception.FilterResponseHandler;
+import com.example.backend_comic_service.develop.exception.ResponseFactory;
+import com.example.backend_comic_service.develop.utils.ErrorCodeConst;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,15 +26,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
-
+    private final ResponseFactory responseFactory;
     public JwtAuthenticationFilter(
             JwtService jwtService,
             UserDetailsService userDetailsService,
-            HandlerExceptionResolver handlerExceptionResolver
+            HandlerExceptionResolver handlerExceptionResolver,
+            ResponseFactory responseFactory
     ) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
         this.handlerExceptionResolver = handlerExceptionResolver;
+        this.responseFactory = responseFactory;
     }
 
     @Override
@@ -40,9 +45,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        final String authHeader = request.getHeader("Authorization");
+        // Skip token validation for public endpoints
+        if (shouldNotFilter(request)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
+        final String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            FilterResponseHandler.returnError(response, ErrorCodeConst.UNAUTHORIZED, null, null, this.responseFactory);
             filterChain.doFilter(request, response);
             return;
         }
@@ -70,7 +81,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(request, response);
         } catch (Exception exception) {
+            FilterResponseHandler.returnError(response, ErrorCodeConst.UNAUTHORIZED, null, null, this.responseFactory);
             handlerExceptionResolver.resolveException(request, response, null, exception);
         }
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        return path.endsWith("/login") || path.endsWith("/public")  || path.endsWith("/register");
     }
 }

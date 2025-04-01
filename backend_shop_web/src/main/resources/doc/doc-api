@@ -1,0 +1,31 @@
+--create
+curl --location --request POST 'https://5fd1-2405-4802-182e-9530-8119-aeca-1e8-dce7.ngrok-free.app/api/shipping-fee' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJsaW5odnEiLCJpYXQiOjE3NDMwNzA4NjksImV4cCI6MTc0MzA3NDQ2OX0.6hpWfOQg9DIUhVb8gLSeSSFGEAD26kCQ61b4fKurroM' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "pointSource": "HN",
+    "pointDestination": "DN",
+    "fee": 10000,
+    "status": "ACTIVE"
+}'
+
+-- update
+curl --location --request PUT 'https://5fd1-2405-4802-182e-9530-8119-aeca-1e8-dce7.ngrok-free.app/api/shipping-fee/1' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJsaW5odnEiLCJpYXQiOjE3NDMwNzE1OTcsImV4cCI6MTc0MzA3NTE5N30.OcORkps8Rfk9ZlEJTrG-Y5pZuKssZ26aLh-ciTcPkTI' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "fee": 110000
+}'
+
+-- detail
+curl --location --request GET 'https://5fd1-2405-4802-182e-9530-8119-aeca-1e8-dce7.ngrok-free.app/api/shipping-fee/1/detail' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJsaW5odnEiLCJpYXQiOjE3NDMwNzE1OTcsImV4cCI6MTc0MzA3NTE5N30.OcORkps8Rfk9ZlEJTrG-Y5pZuKssZ26aLh-ciTcPkTI' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "fee": 50000
+}'
+
+-- page
+curl --location --request GET 'https://5fd1-2405-4802-182e-9530-8119-aeca-1e8-dce7.ngrok-free.app/api/shipping-fee?pageIndex=1' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJsaW5odnEiLCJpYXQiOjE3NDMwNzE1OTcsImV4cCI6MTc0MzA3NTE5N30.OcORkps8Rfk9ZlEJTrG-Y5pZuKssZ26aLh-ciTcPkTI' \
+--data-raw ''

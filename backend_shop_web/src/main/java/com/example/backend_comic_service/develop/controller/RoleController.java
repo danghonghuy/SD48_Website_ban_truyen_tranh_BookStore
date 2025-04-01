@@ -27,16 +27,17 @@ public class RoleController {
     public BaseResponseModel<RoleModel> getById(@PathVariable Long id) {
         return roleServiceImpl.getRoleById(id);
     }
-    @DeleteMapping("/delete/{id}")
-    public BaseResponseModel<Long> delete(@PathVariable Long id) {
-        return roleServiceImpl.deleteRole(id);
+    @GetMapping("/delete")
+    public BaseResponseModel<Long> delete(@RequestParam( value = "id",required = false)  Long id,
+                                          @RequestParam( value = "status",required = false) Integer status) {
+        return roleServiceImpl.deleteRole(id, status);
     }
     @GetMapping("/get-list-role")
-    public BaseListResponseModel<List<RoleModel>> getListRole(@RequestParam( value = "name",required = false) String name,
-                                                              @RequestParam(value = "code", required = false) String code,
-                                                              @RequestParam(value = "pageIndex", required = true, defaultValue = "0") Integer pageIndex,
+    public BaseListResponseModel<List<RoleModel>> getListRole(@RequestParam( value = "keySearch",required = false) String keySearch,
+                                                              @RequestParam( value = "status",required = false) Integer status,
+                                                              @RequestParam(value = "pageIndex", required = true, defaultValue = "1") Integer pageIndex,
                                                               @RequestParam(value = "pageSize", required = true, defaultValue = "10") Integer pageSize) {
-        Pageable pageable = PageRequest.of(pageIndex, pageSize);
-        return roleServiceImpl.getListRole(name, code, pageable);
+        Pageable pageable = PageRequest.of(pageIndex - 1, pageSize);
+        return roleServiceImpl.getListRole(keySearch, status, pageable);
     }
 }

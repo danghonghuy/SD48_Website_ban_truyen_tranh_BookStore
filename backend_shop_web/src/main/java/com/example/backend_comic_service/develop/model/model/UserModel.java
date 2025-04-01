@@ -1,6 +1,7 @@
 package com.example.backend_comic_service.develop.model.model;
 
 import com.example.backend_comic_service.develop.entity.UserEntity;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,11 +9,13 @@ import lombok.Setter;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserModel {
     private Integer id;
     private String code;
@@ -31,6 +34,8 @@ public class UserModel {
     private Integer updatedBy;
     private Integer status;
     private Integer roleId;
+    private String roleCode;
+    private List<AddressModel> address;
 
     public UserEntity toUserEntity() {
         UserEntity userEntity = new UserEntity();

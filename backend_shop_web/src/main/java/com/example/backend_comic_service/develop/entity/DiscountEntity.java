@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.sql.Date;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -31,10 +32,6 @@ public class DiscountEntity {
     private Date startDate;
     @Column(name = "end_date")
     private Date endDate;
-    @Column(name = "min_value")
-    private Integer minValue;
-    @Column(name = "max_value")
-    private Integer maxValue;
     @Column(name = "status")
     private Integer status;
     @Column(name = "is_deleted")
@@ -49,6 +46,8 @@ public class DiscountEntity {
     private Integer updatedBy;
     @Column(name = "[percent]")
     private Integer percent;
+    @OneToMany(mappedBy = "discount", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<ProductDiscountEntity> productDiscountEntities;
     public DiscountModel toDiscountModel() {
         DiscountModel discountModel = new DiscountModel();
         discountModel.setId(id);
@@ -59,8 +58,6 @@ public class DiscountEntity {
         discountModel.setMoneyDiscount(moneyDiscount);
         discountModel.setStartDate(startDate);
         discountModel.setEndDate(endDate);
-        discountModel.setMinValue(minValue);
-        discountModel.setMaxValue(maxValue);
         discountModel.setStatus(status);
         discountModel.setIsDeleted(isDeleted);
         discountModel.setCreatedDate(createdDate);
@@ -68,6 +65,10 @@ public class DiscountEntity {
         discountModel.setUpdatedDate(updatedDate);
         discountModel.setUpdatedBy(updatedBy);
         discountModel.setPercent(percent);
+        if(!productDiscountEntities.isEmpty()){
+            List<Integer> productIds = productDiscountEntities.stream().map(ProductDiscountEntity::getProduct).toList().stream().map(ProductEntity::getId).toList();
+            discountModel.setProductIds(productIds);
+        }
         return discountModel;
     }
 }

@@ -12,4 +12,6 @@ import java.util.List;
 public interface IOrderService {
     BaseResponseModel<Integer> createOrder(OrderModel model);
     BaseListResponseModel<List<OrderGetListMapper>> getListOrders(Integer userId, Integer paymentId, Integer employeeId, Integer status, Integer stage, Integer type, Integer startPrice, Integer endPrice, Date startDate, Date endDate, Pageable pageable);
+    BaseResponseModel<String> generateCode();
+    BaseResponseModel<Integer> updateStatus(Integer id, Integer status, String description);
 }

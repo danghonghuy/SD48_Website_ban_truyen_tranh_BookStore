@@ -13,6 +13,4 @@ public class ProductDiscountMapper {
     private Integer discountType;
     private Integer discountPercent;
     private Integer discountMoney;
-    private Integer minValue;
-    private Integer maxValue;
 }

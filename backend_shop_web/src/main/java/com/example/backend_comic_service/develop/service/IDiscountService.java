@@ -11,7 +11,7 @@ import java.util.List;
 public interface IDiscountService {
     BaseResponseModel<DiscountModel> addOrChange(DiscountModel discountModel);
     BaseResponseModel<DiscountModel> getDiscountById(Integer id);
-    BaseResponseModel<Integer> delete(Integer id);
+    BaseResponseModel<Integer> delete(Integer id, Integer status);
     BaseListResponseModel<List<DiscountModel>> getListDiscount(Date startDate, Date endDate, Integer minValue, Integer maxValue, String keySearch, Integer status, Pageable pageable);
     BaseResponseModel<String> generateDiscountCode();
 }

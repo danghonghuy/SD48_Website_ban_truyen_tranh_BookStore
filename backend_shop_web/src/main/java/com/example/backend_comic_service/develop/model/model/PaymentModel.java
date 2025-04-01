@@ -18,6 +18,7 @@ public class PaymentModel {
     private Date updatedDate;
     private Integer updatedBy;
     private Integer createdBy;
+    private Integer status;
     public PaymentEntity toEntity() {
         PaymentEntity paymentEntity = new PaymentEntity();
         paymentEntity.setId(id);
@@ -27,6 +28,7 @@ public class PaymentModel {
         paymentEntity.setUpdatedDate(updatedDate);
         paymentEntity.setUpdatedBy(updatedBy);
         paymentEntity.setCreatedBy(createdBy);
+        paymentEntity.setStatus(status);
         return paymentEntity;
     }
 }

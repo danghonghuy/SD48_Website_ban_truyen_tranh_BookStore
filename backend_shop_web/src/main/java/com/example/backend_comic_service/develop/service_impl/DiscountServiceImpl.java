@@ -1,11 +1,17 @@
 package com.example.backend_comic_service.develop.service_impl;
 
 import com.example.backend_comic_service.develop.entity.DiscountEntity;
+import com.example.backend_comic_service.develop.entity.ProductDiscountEntity;
+import com.example.backend_comic_service.develop.entity.ProductEntity;
+import com.example.backend_comic_service.develop.entity.UserEntity;
 import com.example.backend_comic_service.develop.model.base_response.BaseListResponseModel;
 import com.example.backend_comic_service.develop.model.base_response.BaseResponseModel;
 import com.example.backend_comic_service.develop.model.model.DiscountModel;
 import com.example.backend_comic_service.develop.repository.DiscountRepository;
+import com.example.backend_comic_service.develop.repository.ProductDiscountRepository;
+import com.example.backend_comic_service.develop.repository.ProductRepository;
 import com.example.backend_comic_service.develop.service.IDiscountService;
+import com.example.backend_comic_service.develop.utils.AuthenticationService;
 import com.example.backend_comic_service.develop.utils.UtilService;
 import com.example.backend_comic_service.develop.validator.DiscountValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.sql.Date;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -26,6 +34,12 @@ public class DiscountServiceImpl implements IDiscountService {
     private DiscountValidator discountValidator;
     @Autowired
     private UtilService utilService;
+    @Autowired
+    private AuthenticationService authenticationService;
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private ProductDiscountRepository productDiscountRepository;
 
     @Override
     public BaseResponseModel<DiscountModel> addOrChange(DiscountModel discountModel) {
@@ -36,10 +50,52 @@ public class DiscountServiceImpl implements IDiscountService {
                 response.errorResponse(errorMessage);
                 return response;
             }
-            DiscountEntity discountEntity = discountRepository.saveAndFlush(discountModel.toEntity());
-
-            if(discountEntity.getId() != null){
-                response.setData(discountModel);
+            UserEntity userEntity = authenticationService.authenToken();
+            if(userEntity == null){
+                response.errorResponse("Authentication Failed");
+                return response;
+            }
+            DiscountEntity discountEntity = new DiscountEntity();
+            if(discountModel.getId() != null){
+                discountEntity = discountRepository.findById(discountModel.getId()).orElse(null);
+                if(discountEntity == null){
+                    response.errorResponse("Discount Not Found");
+                    return response;
+                }
+                discountEntity.setStartDate(discountModel.getStartDate());
+                discountEntity.setEndDate(discountModel.getEndDate());
+                discountEntity.setDescription(discountModel.getDescription());
+                discountEntity.setType(discountModel.getType());
+                if(discountModel.getType() == 1){
+                    discountEntity.setPercent(discountModel.getPercent());
+                }else{
+                    discountEntity.setMoneyDiscount(discountModel.getMoneyDiscount());
+                }
+            }else{
+                discountEntity = discountModel.toEntity();
+                discountEntity.setCreatedBy(userEntity.getId());
+                discountEntity.setCreatedDate(Date.valueOf(LocalDate.now()));
+            }
+            discountEntity.setUpdatedBy(userEntity.getId());
+            discountEntity.setUpdatedDate(Date.valueOf(LocalDate.now()));
+            DiscountEntity discount = discountRepository.saveAndFlush(discountEntity);
+            if(discount.getId() != null){
+                if(discountModel.getId() != null && discountModel.getId()  > 0){
+                    discountRepository.deleteProductWithDiscountId(discountModel.getId());
+                }
+                if(!discountModel.getProductIds().isEmpty()){
+                    List<ProductEntity> productEntities = productRepository.getListProductByIds(discountModel.getProductIds());
+                    List<ProductDiscountEntity> productDiscountEntities = new ArrayList<>();
+                    for (ProductEntity item: productEntities) {
+                        ProductDiscountEntity productDiscountEntity = new ProductDiscountEntity();
+                        productDiscountEntity.setDiscount(discount);
+                        productDiscountEntity.setProduct(item);
+                        productDiscountEntity.setStatus(1);
+                        productDiscountEntity.setIsDeleted(0);
+                        productDiscountEntities.add(productDiscountEntity);
+                    }
+                    productDiscountRepository.saveAllAndFlush(productDiscountEntities);
+                }
                 response.successResponse(discountModel, "Update successful");
                 return response;
             }
@@ -73,7 +129,7 @@ public class DiscountServiceImpl implements IDiscountService {
     }
 
     @Override
-    public BaseResponseModel<Integer> delete(Integer id) {
+    public BaseResponseModel<Integer> delete(Integer id, Integer status) {
         BaseResponseModel<Integer> response = new BaseResponseModel<>();
         try{
             DiscountEntity discountEntity = discountRepository.findById(id).orElse(null);
@@ -81,7 +137,7 @@ public class DiscountServiceImpl implements IDiscountService {
                 response.errorResponse("Discount not found");
                 return response;
             }
-            discountRepository.updateDeleteDiscount(discountEntity.getId());
+            discountRepository.updateDeleteDiscount(discountEntity.getId(), status);
             response.successResponse(id, "Delete discount success");
             return response;
         }
@@ -94,7 +150,7 @@ public class DiscountServiceImpl implements IDiscountService {
     public BaseListResponseModel<List<DiscountModel>> getListDiscount(Date startDate, Date endDate, Integer minValue, Integer maxValue, String keySearch, Integer status, Pageable pageable) {
         BaseListResponseModel<List<DiscountModel>> response = new BaseListResponseModel<>();
         try{
-            Page<DiscountEntity> entityList = discountRepository.getListDiscount(startDate, endDate, minValue, maxValue, keySearch, status, pageable);
+            Page<DiscountEntity> entityList = discountRepository.getListDiscount(startDate, endDate, keySearch, status, pageable);
             if(entityList == null){
                 response.errorResponse("Discount list is empty");
                 return response;

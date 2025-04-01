@@ -1,10 +1,12 @@
 package com.example.backend_comic_service.develop.entity;
 
+import com.example.backend_comic_service.develop.model.model.OrderDetailModel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.aspectj.weaver.ast.Or;
 
 import java.sql.Date;
 
@@ -45,4 +47,17 @@ public class OrderDetailEntity {
     private Double price;
     @Column(name = "origin_price")
     private Double originPrice;
+    public OrderDetailModel toModel(){
+        OrderDetailModel orderDetailModel = new OrderDetailModel();
+        orderDetailModel.setId(id);
+        orderDetailModel.setQuantity(quantity);
+        orderDetailModel.setTotal(total);
+        orderDetailModel.setPrice(price);
+        orderDetailModel.setOriginPrice(originPrice);
+        orderDetailModel.setProductId(product.getId());
+        orderDetailModel.setName(product.getName());
+        orderDetailModel.setCode(product.getCode());
+        orderDetailModel.setImage(!product.getImageEntities().isEmpty() ? product.getImageEntities().get(0).getImageUrl() : "");
+        return orderDetailModel;
+    }
 }

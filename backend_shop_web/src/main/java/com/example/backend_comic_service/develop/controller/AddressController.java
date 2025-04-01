@@ -33,17 +33,14 @@ public class AddressController {
     public BaseListResponseModel<List<ProvinceModel>> getListProvince(@RequestParam( value = "name",required = false) String name){
         return  provinceService.getListProvinces(name);
     }
-
     @GetMapping("/get-district")
     public BaseListResponseModel<List<DistrictModel>> getListDistrict(@RequestParam( value = "name",required = false) String name,
                                                                       @RequestParam(value = "code", required = false) String code){
         return  districtService.getListDistrict(name, code);
     }
-
     @GetMapping("/get-wards")
     public BaseListResponseModel<List<WardModel>> getListWard(@RequestParam( value = "name",required = false) String name,
                                                               @RequestParam(value = "code", required = false) String code){
         return  wardService.getListWards(name, code);
     }
-
 }

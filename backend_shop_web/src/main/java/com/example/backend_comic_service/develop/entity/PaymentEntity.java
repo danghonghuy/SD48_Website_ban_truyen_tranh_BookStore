@@ -41,6 +41,7 @@ public class PaymentEntity {
         paymentModel.setId(id);
         paymentModel.setCode(code);
         paymentModel.setName(name);
+        paymentModel.setStatus(status);
         paymentModel.setCreatedDate(createdDate);
         paymentModel.setUpdatedDate(updatedDate);
         paymentModel.setUpdatedBy(updatedBy);

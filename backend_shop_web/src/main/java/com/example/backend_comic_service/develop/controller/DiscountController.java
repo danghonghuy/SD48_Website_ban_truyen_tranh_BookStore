@@ -23,9 +23,10 @@ public class DiscountController {
     public BaseResponseModel<DiscountModel> addOrChange(@RequestBody DiscountModel discountModel) {
         return discountService.addOrChange(discountModel);
     }
-    @DeleteMapping("/delete/{id}")
-    public BaseResponseModel<Integer> delete(@PathVariable Integer id) {
-        return discountService.delete(id);
+    @GetMapping("/delete")
+    public BaseResponseModel<Integer> delete(@RequestParam(value = "id", required = false) Integer id,
+                                             @RequestParam(value = "status", required = false) Integer status) {
+        return discountService.delete(id,status);
     }
     @GetMapping("/detail/{id}")
     public BaseResponseModel<DiscountModel> detail(@PathVariable Integer id) {
@@ -34,18 +35,15 @@ public class DiscountController {
     @GetMapping("/get-list-discount")
     public BaseListResponseModel<List<DiscountModel>> getListDiscount(@RequestParam(value = "startDate", required = false)Date startDate,
                                                                       @RequestParam(value = "endDate", required = false)Date endDate,
-                                                                      @RequestParam(value = "minValue", required = false) Integer minValue,
-                                                                      @RequestParam(value = "maxValue", required = false) Integer maxValue,
                                                                       @RequestParam(value = "keySearch", required = false) String keySearch,
                                                                       @RequestParam(value = "status", required = false) Integer status,
                                                                       @RequestParam(value = "pageIndex") Integer pageIndex,
                                                                       @RequestParam(value = "pageSize") Integer pageSize) {
-        Pageable pageable = PageRequest.of(pageIndex, pageSize);
-        return discountService.getListDiscount(startDate, endDate, minValue, maxValue, keySearch, status, pageable);
+        Pageable pageable = PageRequest.of(pageIndex - 1, pageSize);
+        return discountService.getListDiscount(startDate, endDate, null, null, keySearch, status, pageable);
     }
     @GetMapping("/generate-code")
     public BaseResponseModel<String> generateCode() {
         return discountService.generateDiscountCode();
     }
-
 }

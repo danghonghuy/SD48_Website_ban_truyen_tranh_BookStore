@@ -5,6 +5,7 @@ import com.example.backend_comic_service.develop.model.model.UserModel;
 import com.example.backend_comic_service.develop.repository.UserRepository;
 import com.example.backend_comic_service.develop.utils.UtilService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -42,16 +43,13 @@ public class UserValidator {
         if(!StringUtils.hasText(model.getUserName())){
             return "Username is null";
         }
-        if(!StringUtils.hasText(model.getPassword())){
-            return "Password is null";
-        }
         List<UserEntity> UserEntities = new ArrayList<>();
         UserEntities = userRepository.getUserEntitiesByEmail(model.getEmail());
         if(!UserEntities.isEmpty() && (model.getId() == null || (!model.getId().equals(UserEntities.get(0).getId())))){
             return "Email already exists";
         }
         UserEntities = userRepository.getUserEntitiesByUserName(model.getUserName());
-        if(!UserEntities.isEmpty() && model.getId() != null){
+        if(!UserEntities.isEmpty() && (model.getId() == null || (!model.getId().equals(UserEntities.get(0).getId())))){
             return "Username already exists";
         }
         UserEntities = userRepository.getUserEntitiesByPhoneNumber(model.getPhoneNumber());

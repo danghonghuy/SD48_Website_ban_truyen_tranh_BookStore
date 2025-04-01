@@ -24,9 +24,9 @@ public class TypeController {
     public BaseResponseModel<TypeModel> addOrChange(@RequestBody TypeModel model) {
         return typeService.addOrChange(model);
     }
-    @DeleteMapping("/delete/{id}")
-    public BaseResponseModel<Integer> delete(@PathVariable Integer id) {
-        return typeService.delete(id);
+    @GetMapping("/delete")
+    public BaseResponseModel<Integer> delete(@RequestParam(value = "id", required = false)Integer id, @RequestParam(value = "status", required = false)Integer status) {
+        return typeService.delete(id,status);
     }
     @GetMapping("/detail/{id}")
     public BaseResponseModel<TypeModel> detail(@PathVariable Integer id) {
@@ -37,7 +37,7 @@ public class TypeController {
                                                                       @RequestParam(value = "status", required = false) Integer status,
                                                                       @RequestParam(value = "pageIndex") Integer pageIndex,
                                                                       @RequestParam(value = "pageSize") Integer pageSize) {
-        Pageable pageable = PageRequest.of(pageIndex, pageSize);
+        Pageable pageable = PageRequest.of(pageIndex - 1, pageSize);
         return typeService.getListTypes(keySearch, status, pageable);
     }
     @GetMapping("/generate-code")

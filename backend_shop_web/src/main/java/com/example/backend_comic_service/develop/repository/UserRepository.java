@@ -21,6 +21,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     boolean existsByUserName(String userName);
     Optional<UserEntity> findUserEntitiesById(Integer id);
     Integer deleteUserEntitiesById(Integer id);
-    @Query(value = "select * from users u where ( (LEN(isnull(?1 , '')) <= 0 or u.code like ?1 + '%' or u.[full_name] like  ?1 + '%' or u.[email] like ?1 + '%' or u.[phone_number] like  ?1 + '%') and u.[status] = isnull(?2, u.[status])) order by u.id desc", nativeQuery = true)
-    Page<UserEntity> getListUser(String keySearch, Integer status, Pageable pageable);
+    @Query(value = "select * from users u where ( (LEN(isnull(?1 , '')) <= 0 or u.code like ?1 + '%' or u.[full_name] like  ?1 + '%' or u.[email] like ?1 + '%' or u.[phone_number] like  ?1 + '%') and u.[status] = isnull(?2, u.[status])) and u.role_id = ?3 order by u.id desc", nativeQuery = true)
+    Page<UserEntity> getListUser(String keySearch, Integer status, Integer roleId, Pageable pageable);
 }

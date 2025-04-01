@@ -18,6 +18,8 @@ public class HandleImageService {
 
     @Value("${com.develop.path-save-image}")
     private String saveImagePath;
+    @Value("${com.develop.path-server-image}")
+    private String serverImagePath;
 
     public String handleBase64Image(String filePath){
         try{
@@ -38,7 +40,7 @@ public class HandleImageService {
             String originalFilename = file.getOriginalFilename();
             Path path = Paths.get(saveImagePath + localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()+ originalFilename);
             Files.copy(file.getInputStream(), path);
-            return path.toString();
+            return serverImagePath +  localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()+ originalFilename;
         }
         catch (Exception e){
             return "";

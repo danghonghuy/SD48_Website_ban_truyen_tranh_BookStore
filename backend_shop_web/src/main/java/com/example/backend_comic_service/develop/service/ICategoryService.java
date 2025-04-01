@@ -9,10 +9,9 @@ import java.util.List;
 
 public interface ICategoryService {
 
-    BaseListResponseModel<List<CategoryModel>> getListCategory(String name, String code, Integer status, Pageable pageable);
-
+    BaseListResponseModel<List<CategoryModel>> getListCategory(String keySearch, Integer status, Pageable pageable);
     BaseResponseModel<Integer> addOrChange(CategoryModel categoryModel);
-    BaseResponseModel<Integer> deleteCategory(Integer id);
+    BaseResponseModel<Integer> deleteCategory(Integer id, Integer status);
     BaseResponseModel<CategoryModel> getCategoryDetail(Integer id);
     BaseResponseModel<String> generateCode();
 }

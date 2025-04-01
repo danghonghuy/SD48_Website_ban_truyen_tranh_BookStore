@@ -23,9 +23,10 @@ public class CouponController {
     public BaseResponseModel<CouponModel> addOrChange(@RequestBody CouponModel model) {
         return couponService.addOrChange(model);
     }
-    @DeleteMapping("/delete/{id}")
-    public BaseResponseModel<Integer> delete(@PathVariable Integer id) {
-        return couponService.delete(id);
+    @GetMapping("/delete")
+    public BaseResponseModel<Integer> changeStatus(@RequestParam(value = "id", required = false)  Integer id,
+                                                   @RequestParam(value = "status", required = false)  Integer status) {
+        return couponService.delete(id,status);
     }
     @GetMapping("/detail/{id}")
     public BaseResponseModel<CouponModel> detail(@PathVariable Integer id) {
@@ -40,11 +41,16 @@ public class CouponController {
                                                                       @RequestParam(value = "status", required = false) Integer status,
                                                                       @RequestParam(value = "pageIndex") Integer pageIndex,
                                                                       @RequestParam(value = "pageSize") Integer pageSize) {
-        Pageable pageable = PageRequest.of(pageIndex, pageSize);
+        Pageable pageable = PageRequest.of(pageIndex - 1, pageSize);
         return couponService.getListCoupon(startDate, endDate, minValue, maxValue, keySearch, status, pageable);
     }
     @GetMapping("/generate-code")
     public BaseResponseModel<String> generateCode() {
         return couponService.generateCouponCode();
+    }
+    @GetMapping("/get-coupon-code")
+    public BaseResponseModel<Double> getCoupon(@RequestParam(value = "code", required = false) String code,
+                                               @RequestParam(value = "sumPrice", required = false) Double sumPrice) {
+        return couponService.useCoupon(code, sumPrice);
     }
 }

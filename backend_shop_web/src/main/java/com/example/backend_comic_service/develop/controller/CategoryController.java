@@ -22,22 +22,22 @@ public class CategoryController {
     public BaseResponseModel<Integer> addOrChange(@RequestBody CategoryModel model){
         return categoryService.addOrChange(model);
     }
-    @DeleteMapping("/delete/{id}")
-    public BaseResponseModel<Integer> deleteCategory(@PathVariable Integer id){
-        return categoryService.deleteCategory(id);
+    @GetMapping("/delete")
+    public BaseResponseModel<Integer> deleteCategory(@RequestParam(value = "id", required = false)  Integer id,
+                                                     @RequestParam(value = "status", required = false)  Integer status){
+        return categoryService.deleteCategory(id, status);
     }
     @GetMapping("/detail/{id}")
     public BaseResponseModel<CategoryModel> getCategoryDetail(@PathVariable Integer id){
         return categoryService.getCategoryDetail(id);
     }
     @GetMapping("/get-category-list")
-    public BaseListResponseModel<List<CategoryModel>> getListCategory(@RequestParam( value = "name",required = false) String name,
-                                                                      @RequestParam(value = "code", required = false) String code,
+    public BaseListResponseModel<List<CategoryModel>> getListCategory(@RequestParam(value = "keySearch", required = false) String keySearch,
                                                                       @RequestParam(value = "status", required = false) Integer status,
-                                                                      @RequestParam(value = "pageIndex", required = true, defaultValue = "0") Integer pageIndex,
-                                                                      @RequestParam(value = "pageSize", required = true, defaultValue = "10") Integer pageSize){
-        Pageable pageable =  PageRequest.of(pageIndex, pageSize);
-        return  categoryService.getListCategory(name, code, status, pageable);
+                                                                      @RequestParam(value = "pageIndex", defaultValue = "0") Integer pageIndex,
+                                                                      @RequestParam(value = "pageSize",  defaultValue = "10") Integer pageSize){
+        Pageable pageable =  PageRequest.of(pageIndex - 1, pageSize);
+        return  categoryService.getListCategory(keySearch, status, pageable);
     }
     @GetMapping("/generate-code")
     public BaseResponseModel<String> generateCode() {

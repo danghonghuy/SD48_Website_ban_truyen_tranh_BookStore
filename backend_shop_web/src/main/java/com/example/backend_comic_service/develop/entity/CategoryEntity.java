@@ -41,6 +41,9 @@ public class CategoryEntity {
     private Integer updatedBy;
     @OneToMany(mappedBy = "categoryEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductEntity> products;
+    @ManyToOne
+    @JoinColumn(name = "catalog_id")
+    private CatalogEntity catalogEntity;
 
     public CategoryModel categoryModel(){
         CategoryModel model = new CategoryModel();
@@ -54,6 +57,8 @@ public class CategoryEntity {
         model.setCreatedDate(this.getCreatedDate());
         model.setUpdatedBy(this.getUpdatedBy());
         model.setUpdatedDate(this.getUpdatedDate());
+        model.setCatalogId(this.getCatalogEntity() != null ? this.getCatalogEntity().getId() : null);
+        model.setCatalogName(this.getCatalogEntity() != null ? this.getCatalogEntity().getName() : null);
         return model;
     }
 

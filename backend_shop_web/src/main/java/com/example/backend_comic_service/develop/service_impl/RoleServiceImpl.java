@@ -1,11 +1,13 @@
 package com.example.backend_comic_service.develop.service_impl;
 
 import com.example.backend_comic_service.develop.entity.RoleEntity;
+import com.example.backend_comic_service.develop.entity.UserEntity;
 import com.example.backend_comic_service.develop.model.base_response.BaseListResponseModel;
 import com.example.backend_comic_service.develop.model.base_response.BaseResponseModel;
 import com.example.backend_comic_service.develop.model.model.RoleModel;
 import com.example.backend_comic_service.develop.repository.RoleRepository;
 import com.example.backend_comic_service.develop.service.IRoleService;
+import com.example.backend_comic_service.develop.utils.AuthenticationService;
 import com.example.backend_comic_service.develop.validator.RoleValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -13,17 +15,23 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class RoleServiceImpl implements IRoleService {
 
+    private final RoleRepository roleRepository;
+    private final RoleValidator roleValidator;
+    private final AuthenticationService authenticationService;
     @Autowired
-    private RoleRepository roleRepository;;
-    @Autowired
-    private RoleValidator roleValidator;
-
+    public RoleServiceImpl(RoleRepository roleRepository, RoleValidator roleValidator, AuthenticationService authenticationService) {
+        this.roleRepository = roleRepository;
+        this.roleValidator = roleValidator;
+        this.authenticationService = authenticationService;
+    }
 
     @Override
     public BaseResponseModel<Integer> addOrChange(RoleModel model) {
@@ -34,17 +42,32 @@ public class RoleServiceImpl implements IRoleService {
                 response.errorResponse(errorString);
                 return response;
             }
-            RoleEntity roleEntity = RoleEntity.fromRoleModel(model);
-            if(roleEntity != null) {
-               RoleEntity roleSave =  roleRepository.save(roleEntity);
-               if(roleSave.getId() != null) {
-                   response.successResponse(roleSave.getId(), "Insert success");
-                   return response;
-               }
-               response.errorResponse("Insert fail");
-               return response;
+            UserEntity userEntity = authenticationService.authenToken();
+            if(userEntity == null) {
+                response.errorResponse("Authentication failed");
+                return response;
             }
-            response.errorResponse("Insert role fail");
+            RoleEntity roleEntity;
+            if(model.getId() != null) {
+                roleEntity = roleRepository.findRoleEntitiesById((long) model.getId()).orElse(null);
+                if(roleEntity == null) {
+                    response.errorResponse("Not exist role with id");
+                    return response;
+                }
+                roleEntity.setName(model.getName());
+            }else{
+                roleEntity = model.toRoleEntity();
+                roleEntity.setCreatedBy(userEntity.getId());
+                roleEntity.setCreatedDate(Date.valueOf(LocalDate.now()));
+            }
+            roleEntity.setUpdatedBy(userEntity.getId());
+            roleEntity.setUpdatedDate(Date.valueOf(LocalDate.now()));
+            RoleEntity roleSave =  roleRepository.save(roleEntity);
+            if(roleSave.getId() != null) {
+                response.successResponse(roleSave.getId(),  "Update success" );
+                return response;
+            }
+            response.errorResponse("Insert fail");
             return response;
         }
         catch (Exception e){
@@ -54,7 +77,7 @@ public class RoleServiceImpl implements IRoleService {
     }
 
     @Override
-    public  BaseResponseModel<Long> deleteRole(Long id) {
+    public  BaseResponseModel<Long> deleteRole(Long id, Integer status) {
         BaseResponseModel<Long> response = new BaseResponseModel<>();
         try{
             Optional<RoleEntity> roleEntity = roleRepository.findRoleEntitiesById(id);
@@ -64,7 +87,7 @@ public class RoleServiceImpl implements IRoleService {
             }
             RoleEntity role = roleEntity.get();
             role.setIsDelete(1);
-            role.setStatus(0);
+            role.setStatus(status);
             roleRepository.saveAndFlush(role);
             response.successResponse(id, "Role delete success");
             return  response;
@@ -76,10 +99,10 @@ public class RoleServiceImpl implements IRoleService {
     }
 
     @Override
-    public BaseListResponseModel<List<RoleModel>> getListRole(String code, String name, Pageable pageable) {
+    public BaseListResponseModel<List<RoleModel>> getListRole(String keySearch,Integer status, Pageable pageable) {
         BaseListResponseModel<List<RoleModel>> response = new BaseListResponseModel<>();
         try{
-            Page<RoleEntity> roleEntities = roleRepository.findListRoleEntities(code, name, pageable);
+            Page<RoleEntity> roleEntities = roleRepository.findListRoleEntities(keySearch, status, pageable);
             if(roleEntities.isEmpty()) {
                 response.errorResponse("Role entity not exist");
                 return response;

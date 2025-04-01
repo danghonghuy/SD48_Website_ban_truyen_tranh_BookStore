@@ -1,5 +1,6 @@
 package com.example.backend_comic_service.develop.entity;
 
+import com.example.backend_comic_service.develop.model.model.AddressModel;
 import com.example.backend_comic_service.develop.model.model.UserModel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -10,8 +11,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -59,7 +62,8 @@ public class UserEntity implements UserDetails {
     private RoleEntity roleEntity;
     @Column(name = "is_deleted")
     private Integer isDeleted;
-
+    @OneToMany(mappedBy = "userEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<AddressEntity> addressEntities;
     public UserModel toUserModel() {
         UserModel userModel = new UserModel();
         userModel.setId(id);
@@ -78,6 +82,16 @@ public class UserEntity implements UserDetails {
         userModel.setUpdatedBy(updatedBy);
         userModel.setUpdatedDate(updatedDate);
         userModel.setStatus(status);
+        userModel.setRoleId(roleEntity.getId());
+        userModel.setRoleCode(roleEntity.getCode());
+        if(addressEntities != null && !addressEntities.isEmpty()){
+            List<AddressModel> models = new ArrayList<>();
+            addressEntities.forEach(item -> {
+                AddressModel model = item.toModel();
+                models.add(model);
+            });
+            userModel.setAddress(models);
+        }
         return userModel;
     }
 

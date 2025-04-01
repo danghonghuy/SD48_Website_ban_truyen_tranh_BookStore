@@ -1,12 +1,16 @@
 package com.example.backend_comic_service.develop.entity;
 
+import com.example.backend_comic_service.develop.model.model.OrderDetailModel;
+import com.example.backend_comic_service.develop.model.model.OrderModel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.aspectj.weaver.ast.Or;
 
 import java.sql.Date;
+import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -62,4 +66,28 @@ public class OrderEntity {
     private DeliveryEntity deliveryType;
     @Column(name = "coupon_id")
     private Integer couponId;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<OrderDetailEntity> orderDetailEntities;
+    @Column(name = "user_type")
+    private Integer userType;
+    public OrderModel toModel(){
+        OrderModel orderModel = new OrderModel();
+        orderModel.setId(id);
+        orderModel.setCode(code);
+        orderModel.setOrderDate(orderDate);
+        orderModel.setFeeDelivery(feeDelivery);
+        orderModel.setRealPrice(realPrice);
+        orderModel.setTotalPrice(totalPrice);
+        orderModel.setDeliveryModel(deliveryType.toModel());
+        orderModel.setPaymentModel(payment.toModel());
+        orderModel.setUserModel(user.toUserModel());
+        orderModel.setOrderDetailModels(orderDetailEntities.stream().map(OrderDetailEntity::toModel).toList());
+        orderModel.setAddressModel(address.toModel());
+        orderModel.setCouponId(couponId);
+        orderModel.setType(type);
+        orderModel.setUserType(userType);
+        orderModel.setStatus(status);
+        return orderModel;
+    }
+
 }
