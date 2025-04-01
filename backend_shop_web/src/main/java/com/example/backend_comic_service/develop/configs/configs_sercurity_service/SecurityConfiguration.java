@@ -30,12 +30,14 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf()
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/**", "/swagger-ui/**","/swagger-resources/**", "/webjars/**",
-                        "/v3/api-docs/**")
+                .requestMatchers("/api/user/**","/api/product/get-list-product","/api/product/detail","/api/category/get-category-list",
+                        "/swagger-ui/**","/swagger-resources/**", "/webjars/**", "/uploads/**",
+                        "/v3/api-docs/**", "/login", "/register")
                 .permitAll()
                 .anyRequest()
                 .authenticated()
@@ -50,17 +52,15 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-
-        configuration.setAllowedOrigins(List.of("http://localhost:8080"));
-        configuration.setAllowedMethods(List.of("GET","POST", "DELETE", "PUT", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization","Content-Type"));
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("https://book-shop-fe-master.vercel.app/", "http://localhost:3000/")); // Allowed origins
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*")); // Allow all headers
+        config.setAllowCredentials(true); // Allow cookies/auth
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-
-        source.registerCorsConfiguration("/**",configuration);
-
+        source.registerCorsConfiguration("/**", config); // Apply to all paths
         return source;
     }
 }

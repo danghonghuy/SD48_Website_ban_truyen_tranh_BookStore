@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class CategoryValidator {
@@ -26,8 +27,11 @@ public class CategoryValidator {
         if(!StringUtils.hasText(model.getCode())){
             return "Code is null";
         }
+        if(Optional.ofNullable(model.getCatalogId()).orElse(0) <= 0){
+            return "CategoryId is null";
+        }
         List<CategoryEntity> entities = categoryRepository.getCategoryEntitiesByCode(model.getCode());
-        if(!entities.isEmpty() && (model.getId() == null || !model.getId().equals(entities.get(0).getId()))){
+        if(!entities.isEmpty() && (model.getId() == null || !   model.getId().equals(entities.get(0).getId()))){
             return "Code already exists";
         }
         return "";

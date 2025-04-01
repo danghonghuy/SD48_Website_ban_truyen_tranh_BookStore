@@ -3,6 +3,7 @@ package com.example.backend_comic_service.develop.utils;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.util.Random;
 
 @Service
 public class UtilService {
@@ -16,7 +17,7 @@ public class UtilService {
 
     public String getGenderCode(String prefix, Integer number){
         try{
-            String genderCode = String.format("%06d", number);
+            String genderCode = String.format("%03d", number);
             return prefix + genderCode;
         }catch (Exception e){
             throw new RuntimeException(e);
@@ -85,5 +86,15 @@ public class UtilService {
         }
 
         return shuffledPassword.toString();
+    }
+    public static String generateStringFromRegex() {
+        StringBuilder sb = new StringBuilder(10);
+        Random random = new Random();
+        for (int i = 0; i < 10; i++) {
+            char randomChar = (char) ('a' + random.nextInt(26));
+            sb.append(randomChar);
+        }
+
+        return sb.toString().toUpperCase();
     }
 }

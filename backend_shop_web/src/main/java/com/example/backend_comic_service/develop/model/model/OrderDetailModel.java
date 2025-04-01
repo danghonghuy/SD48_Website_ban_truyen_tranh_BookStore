@@ -22,4 +22,7 @@ public class OrderDetailModel {
     private Integer isDeleted;
     private Double price;
     private Double originPrice;
+    private String image;
+    private String name;
+    private String code;
 }

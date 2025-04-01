@@ -26,18 +26,16 @@ public class CategoryModel {
     private Integer createdBy;
     private Date updatedDate;
     private Integer updatedBy;
+    private Integer catalogId;
+    private String catalogName;
     public CategoryEntity categoryEntity(){
         CategoryEntity model = new CategoryEntity();
-        model.setId(this.getId());
-        model.setCode(this.getCode());
-        model.setName(this.getName());
-        model.setDescription(this.getDescription());
-        model.setStatus(this.getStatus());
-        model.setIsDeleted(this.getIsDeleted());
-        model.setCreatedBy(this.getCreatedBy());
-        model.setCreatedDate(this.getCreatedDate());
-        model.setUpdatedBy(this.getUpdatedBy());
-        model.setUpdatedDate(this.getUpdatedDate());
+        model.setId(id);
+        model.setCode(code);
+        model.setName(name);
+        model.setDescription(description);
+        model.setStatus(status);
+        model.setIsDeleted(0);
         return model;
     }
 

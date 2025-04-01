@@ -24,13 +24,7 @@ public class DiscountValidator {
         if(model.getStartDate() == null || model.getEndDate() == null){
             return "Discount model start date or end date is null or empty";
         }
-        if(model.getMinValue() == null || model.getMaxValue() == null){
-            return "Discount model minValue or maxValue is null or empty";
-        }
-        if(model.getMinValue() > model.getMaxValue()){
-            return "Discount model minValue must be smaller maxValue";
-        }
-        if(model.getStartDate().compareTo(model.getEndDate()) > 0){
+        if(model.getStartDate().after(model.getEndDate())){
             return "Discount model start date must be smaller or equal to endDate";
         }
         if(model.getId() == null || model.getId() == 0){

@@ -1,37 +1,54 @@
 package com.example.backend_comic_service.develop.service_impl;
 
+import com.example.backend_comic_service.develop.entity.CatalogEntity;
 import com.example.backend_comic_service.develop.entity.CategoryEntity;
+import com.example.backend_comic_service.develop.entity.UserEntity;
 import com.example.backend_comic_service.develop.model.base_response.BaseListResponseModel;
 import com.example.backend_comic_service.develop.model.base_response.BaseResponseModel;
 import com.example.backend_comic_service.develop.model.model.CategoryModel;
+import com.example.backend_comic_service.develop.repository.CatalogRepository;
 import com.example.backend_comic_service.develop.repository.CategoryRepository;
+import com.example.backend_comic_service.develop.repository.UserRepository;
 import com.example.backend_comic_service.develop.service.ICategoryService;
 import com.example.backend_comic_service.develop.utils.UtilService;
 import com.example.backend_comic_service.develop.validator.CategoryValidator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class CategoryServiceImpl implements ICategoryService {
+    private final CategoryRepository categoryRepository;
+    private final CategoryValidator categoryValidator;
+    private final UtilService utilService;
+    private final UserRepository userRepository;
+    private final CatalogRepository catalogRepository;
     @Autowired
-    private CategoryRepository categoryRepository;
-    @Autowired
-    private CategoryValidator categoryValidator;
-    @Autowired
-    private UtilService utilService;
+    public CategoryServiceImpl(CategoryRepository categoryRepository, CategoryValidator categoryValidator, UtilService utilService, UserRepository userRepository, CatalogRepository catalogRepository) {
+        this.categoryRepository = categoryRepository;
+        this.categoryValidator = categoryValidator;
+        this.utilService = utilService;
+        this.userRepository = userRepository;
+        this.catalogRepository = catalogRepository;
+    }
 
     @Override
-    public BaseListResponseModel<List<CategoryModel>> getListCategory(String name, String code, Integer status, Pageable pageable) {
+    public BaseListResponseModel<List<CategoryModel>> getListCategory(String keySearch, Integer status, Pageable pageable) {
         BaseListResponseModel<List<CategoryModel>> response = new BaseListResponseModel<>();
         try{
-            Page<CategoryEntity> categoryEntities = categoryRepository.getListCategory(code, name, status, pageable);
+            Page<CategoryEntity> categoryEntities = categoryRepository.getListCategory(keySearch, status, pageable);
             List<CategoryModel> categoryModels = new ArrayList<>();
             if(!categoryEntities.isEmpty()){
                categoryModels = categoryEntities.getContent().stream().map(CategoryEntity::categoryModel).toList();
@@ -58,12 +75,47 @@ public class CategoryServiceImpl implements ICategoryService {
                 response.errorResponse(errorMessage);
                 return  response;
             }
-            CategoryEntity categoryEntitySave = categoryRepository.saveAndFlush(categoryModel.categoryEntity());
+            CategoryEntity categoryEntity = new CategoryEntity();
+            try {
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                String username = authentication.getName();
+                UserEntity userCreate = userRepository.findUserEntitiesByUserName(username).orElse(null);
+                if (userCreate == null) {
+                    response.errorResponse("User token is invalid");
+                    return response;
+                }
+                if(Optional.ofNullable(categoryModel.getId()).orElse(0) == 0){
+                    categoryEntity = categoryModel.categoryEntity();
+                    categoryModel.setCreatedBy(userCreate.getId());
+                    categoryModel.setCreatedDate(Date.valueOf(LocalDate.now()));
+                }else{
+                    categoryEntity = categoryRepository.findById(categoryModel.getId()).orElse(null);
+                    if(categoryEntity == null){
+                        response.errorResponse("Category id is invalid");
+                        return response;
+                    }
+                    categoryEntity.setName(categoryModel.getName());
+                    categoryEntity.setDescription(categoryModel.getDescription());
+                }
+                categoryModel.setUpdatedBy(userCreate.getId());
+                categoryModel.setUpdatedDate(Date.valueOf(LocalDate.now()));
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                response.errorResponse(e.getMessage());
+                return response;
+            }
+            Optional<CatalogEntity> catalogEntity = catalogRepository.getCatalogEntityById(categoryModel.getCatalogId());
+            if(catalogEntity.isEmpty()){
+                response.errorResponse("Catalog not exist");
+                return response;
+            }
+            categoryEntity.setCatalogEntity(catalogEntity.get());
+            CategoryEntity categoryEntitySave = categoryRepository.saveAndFlush(categoryEntity);
             if(categoryEntitySave.getId() != null){
                 response.successResponse(categoryEntitySave.getId(), "Success");
                 return response;
             }
-            response.errorResponse("Update category fail");
+            response.errorResponse("Fail");
             return response;
         }
         catch (Exception e){
@@ -73,7 +125,7 @@ public class CategoryServiceImpl implements ICategoryService {
     }
 
     @Override
-    public BaseResponseModel<Integer> deleteCategory(Integer id) {
+    public BaseResponseModel<Integer> deleteCategory(Integer id, Integer status) {
         BaseResponseModel<Integer> response = new BaseResponseModel<>();
         try{
             if(id == null){
@@ -85,7 +137,7 @@ public class CategoryServiceImpl implements ICategoryService {
                 response.errorResponse("Category not exist with id " + id);
                 return  response;
             }
-            categoryRepository.updateCategory(categoryEntityOption.get().getId());
+            categoryRepository.updateCategory(categoryEntityOption.get().getId(), status);
             response.successResponse(categoryEntityOption.get().getId(), "Delete category success");
             return response;
         }

@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import lombok.*;
 
 import java.sql.Date;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,8 +24,6 @@ public class DiscountModel {
     private Integer moneyDiscount;
     private Date startDate;
     private Date endDate;
-    private Integer minValue;
-    private Integer maxValue;
     private Integer status;
     private Integer isDeleted;
     private Date createdDate;
@@ -32,6 +31,7 @@ public class DiscountModel {
     private Date updatedDate;
     private Integer updatedBy;
     private Integer percent;
+    private List<Integer> productIds;
     public DiscountEntity toEntity() {
         DiscountEntity discountEntity = new DiscountEntity();
         discountEntity.setId(id);
@@ -39,18 +39,16 @@ public class DiscountModel {
         discountEntity.setName(name);
         discountEntity.setDescription(description);
         discountEntity.setType(type);
-        discountEntity.setMoneyDiscount(moneyDiscount);
+        discountEntity.setMoneyDiscount(type == 1 ? 0 : moneyDiscount);
         discountEntity.setStartDate(startDate);
         discountEntity.setEndDate(endDate);
-        discountEntity.setMinValue(minValue);
-        discountEntity.setMaxValue(maxValue);
         discountEntity.setStatus(status);
         discountEntity.setIsDeleted(isDeleted);
         discountEntity.setCreatedDate(createdDate);
         discountEntity.setCreatedBy(createdBy);
         discountEntity.setUpdatedDate(updatedDate);
         discountEntity.setUpdatedBy(updatedBy);
-        discountEntity.setPercent(percent);
+        discountEntity.setPercent(type == 2 ? 0 : percent);
         return discountEntity;
     }
 }

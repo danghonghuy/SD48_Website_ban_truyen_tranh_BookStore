@@ -12,8 +12,8 @@ public interface ICouponService {
 
     BaseResponseModel<CouponModel> addOrChange(CouponModel discountModel);
     BaseResponseModel<CouponModel> getCouponById(Integer id);
-    BaseResponseModel<Integer> delete(Integer id);
+    BaseResponseModel<Integer> delete(Integer id, Integer status);
     BaseListResponseModel<List<CouponModel>> getListCoupon(Date startDate, Date endDate, Integer minValue, Integer maxValue, String keySearch, Integer status, Pageable pageable);
     BaseResponseModel<String> generateCouponCode();
-
+    BaseResponseModel<Double> useCoupon(String couponCode, Double sumPrice);
 }

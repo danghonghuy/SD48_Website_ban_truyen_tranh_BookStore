@@ -12,16 +12,13 @@ public class OrderValidator {
         if(order == null){
             return "Order is null";
         }
-        if(Optional.ofNullable(order.getUserId()).orElse(0) == 0){
+        if(Optional.ofNullable(order.getUserId()).orElse(0) == 0 && order.getUserType() == 2){
             return "User is null";
         }
         if(Optional.ofNullable(order.getPaymentId()).orElse(0) == 0){
             return "Payment method is null";
         }
-        if(Optional.ofNullable(order.getEmployeeId()).orElse(0) == 0){
-            return "Employee is null";
-        }
-        if(Optional.ofNullable(order.getAddressId()).orElse(0) == 0){
+        if(Optional.ofNullable(order.getAddressId()).orElse(0) == 0 && order.getUserType() == 2){
             return "Address is null";
         }
         if(Optional.ofNullable(order.getDeliveryType()).orElse(0) == 0){

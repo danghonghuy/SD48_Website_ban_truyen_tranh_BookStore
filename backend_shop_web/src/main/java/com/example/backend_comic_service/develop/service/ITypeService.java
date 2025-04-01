@@ -12,7 +12,7 @@ import java.util.List;
 public interface ITypeService {
     BaseResponseModel<TypeModel> addOrChange(TypeModel discountModel);
     BaseResponseModel<TypeModel> getTypeById(Integer id);
-    BaseResponseModel<Integer> delete(Integer id);
+    BaseResponseModel<Integer> delete(Integer id, Integer status);
     BaseListResponseModel<List<TypeModel>> getListTypes(String keySearch, Integer status, Pageable pageable);
     BaseResponseModel<String> generaTypeCode();
 }

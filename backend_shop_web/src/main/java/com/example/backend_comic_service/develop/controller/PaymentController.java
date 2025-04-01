@@ -24,21 +24,26 @@ public class PaymentController {
     public BaseResponseModel<PaymentModel> addOrChange(@RequestBody PaymentModel model) {
         return paymentService.addOrChange(model);
     }
-    @DeleteMapping("/delete/{id}")
-    public BaseResponseModel<Integer> delete(@PathVariable Integer id) {
-        return paymentService.delete(id);
+
+    @GetMapping("/delete")
+    public BaseResponseModel<Integer> delete(@RequestParam(value = "id", required = false) Integer id, @RequestParam(value = "status") Integer status) {
+        return paymentService.delete(id, status);
     }
+
     @GetMapping("/detail/{id}")
     public BaseResponseModel<PaymentModel> detail(@PathVariable Integer id) {
         return paymentService.getPaymentById(id);
     }
+
     @GetMapping("/get-list-payment")
-    public BaseListResponseModel<List<PaymentModel>> getListDiscount(@RequestParam(value = "keySearch", required = false) String keySearch,
-                                                                     @RequestParam(value = "pageIndex") Integer pageIndex,
-                                                                     @RequestParam(value = "pageSize") Integer pageSize) {
-        Pageable pageable = PageRequest.of(pageIndex, pageSize);
-        return paymentService.getAllPayments(keySearch, pageable);
+    public BaseListResponseModel<List<PaymentModel>> getList(@RequestParam(value = "keySearch", required = false) String keySearch,
+                                                             @RequestParam(value = "status", required = false) Integer status,
+                                                             @RequestParam(value = "pageIndex") Integer pageIndex,
+                                                             @RequestParam(value = "pageSize") Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageIndex - 1, pageSize);
+        return paymentService.getAllPayments(keySearch, status, pageable);
     }
+
     @GetMapping("/generate-code")
     public BaseResponseModel<String> generateCode() {
         return paymentService.generateCode();

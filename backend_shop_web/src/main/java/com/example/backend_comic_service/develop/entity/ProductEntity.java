@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Date;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -52,6 +53,22 @@ public class ProductEntity {
     @ManyToOne
     @JoinColumn(name = "type_id")
     private TypeEntity typeEntity;
+    @OneToMany(mappedBy = "productEntity")
+    List<ImageEntity> imageEntities;
+    @Column(name = "catalog")
+    private String catalog;
+    @Column(name= "author_publish")
+    private String authorPublish;
+    @Column(name = "series")
+    private String series;
+    @Column(name = "author")
+    private String author;
+    @Column(name = "publisher")
+    private String publisher;
+    @Column(name = "date_public")
+    private Date datePublic;
+    @Column(name = "status")
+    private Integer status;
 
     public ProductModel toProductModel() {
         ProductModel productModel = new ProductModel();
@@ -73,6 +90,14 @@ public class ProductEntity {
         productModel.setTypeId(typeEntity.getId());
         productModel.setCategoryName(categoryEntity.getName());
         productModel.setTypeName(typeEntity.getName());
+        productModel.setImages(imageEntities.isEmpty() ? null : imageEntities.stream().map(ImageEntity::getImageUrl).toList());
+        productModel.setCatalog(catalog);
+        productModel.setAuthor(author);
+        productModel.setPublisher(publisher);
+        productModel.setSeries(series);
+        productModel.setAuthorPublish(authorPublish);
+        productModel.setDatePublic(datePublic);
+        productModel.setStatus(status);
         return productModel;
     }
 }

@@ -33,6 +33,7 @@ public class TypeModel {
         typeEntity.setUpdatedDate(updatedDate);
         typeEntity.setCreatedBy(createdBy);
         typeEntity.setUpdatedBy(updatedBy);
+        typeEntity.setIsDeleted(isDeleted);
         return typeEntity;
     }
 }

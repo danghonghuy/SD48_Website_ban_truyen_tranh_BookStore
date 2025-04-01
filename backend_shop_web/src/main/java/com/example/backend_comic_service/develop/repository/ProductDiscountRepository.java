@@ -16,9 +16,7 @@ public interface ProductDiscountRepository extends JpaRepository<ProductDiscount
             "\t   pd.discount_id as discountId, \n" +
             "\t   d.[type] as discountType, \n" +
             "\t   d.[percent] as discountPercent, \n" +
-            "\t   d.money_discount as discountMoney, \n" +
-            "\t   d.min_value as minValue, \n" +
-            "\t   d.max_value as maxValue from product_discount pd inner join discount d on pd.discount_id = d.id \n" +
+            "\t   d.money_discount as discountMoney  from product_discount pd inner join discount d on pd.discount_id = d.id \n" +
             "\t   where getdate() between d.[start_date] and d.[end_date]\n" +
             "\t   and pd.[status] = 1\n" +
             "\t   and pd.product_id in ?1", nativeQuery = true)

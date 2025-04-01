@@ -11,8 +11,8 @@ public interface IRoleService {
 
     BaseResponseModel<Integer> addOrChange(RoleModel model);
 
-    BaseResponseModel<Long> deleteRole(Long id);
+    BaseResponseModel<Long> deleteRole(Long id, Integer status);
 
-    BaseListResponseModel<List<RoleModel>> getListRole(String code, String name, Pageable pageable);
+    BaseListResponseModel<List<RoleModel>> getListRole(String keySearch, Integer status, Pageable pageable);
     BaseResponseModel<RoleModel> getRoleById(Long id);
 }

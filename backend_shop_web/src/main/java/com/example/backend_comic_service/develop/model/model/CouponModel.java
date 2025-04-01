@@ -1,6 +1,8 @@
 package com.example.backend_comic_service.develop.model.model;
 
 import com.example.backend_comic_service.develop.entity.CouponEntity;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -8,6 +10,7 @@ import jakarta.persistence.Id;
 import lombok.*;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,12 +29,15 @@ public class CouponModel {
     private Integer status;
     private Integer isDelete;
     private Integer maxValue;
-    private Date dateStart;
-    private Date dateEnd;
+    private LocalDateTime dateStart;
+    private LocalDateTime dateEnd;
     private  Date createdDate;
     private Integer createdBy;
     private  Date updatedDate;
     private  Integer updated_by;
+    private Integer quantityUsed;
+    private Long dateStartEpochTime;
+    private Long dateEndEpochTime;
     public CouponEntity toEntity() {
         CouponEntity couponEntity = new CouponEntity();
         couponEntity.setId(id);
@@ -50,6 +56,7 @@ public class CouponModel {
         couponEntity.setCreatedDate(createdDate);
         couponEntity.setCreatedBy(createdBy);
         couponEntity.setUpdatedDate(updatedDate);
+        couponEntity.setQuantityUsed(0);
         return couponEntity;
     }
 }

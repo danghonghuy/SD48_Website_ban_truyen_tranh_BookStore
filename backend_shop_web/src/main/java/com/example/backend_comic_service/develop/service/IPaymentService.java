@@ -10,7 +10,7 @@ import java.util.List;
 public interface IPaymentService {
     BaseResponseModel<PaymentModel> addOrChange(PaymentModel paymentModel);
     BaseResponseModel<PaymentModel> getPaymentById(Integer id);
-    BaseListResponseModel<List<PaymentModel>> getAllPayments(String keySearch, Pageable pageable);
-    BaseResponseModel<Integer> delete(Integer id);
+    BaseListResponseModel<List<PaymentModel>> getAllPayments(String keySearch, Integer status,  Pageable pageable);
+    BaseResponseModel<Integer> delete(Integer id, Integer status);
     BaseResponseModel<String> generateCode();
 }

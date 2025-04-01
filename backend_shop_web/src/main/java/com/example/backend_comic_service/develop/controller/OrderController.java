@@ -1,5 +1,6 @@
 package com.example.backend_comic_service.develop.controller;
 
+import com.example.backend_comic_service.develop.entity.OrderEntity;
 import com.example.backend_comic_service.develop.model.base_response.BaseListResponseModel;
 import com.example.backend_comic_service.develop.model.base_response.BaseResponseModel;
 import com.example.backend_comic_service.develop.model.mapper.OrderDetailGetListMapper;
@@ -10,6 +11,7 @@ import com.example.backend_comic_service.develop.service.IOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Date;
@@ -22,15 +24,16 @@ public class OrderController {
     private IOrderService orderService;
     @Autowired
     private IOrderDetailService orderDetailService;
+    private Integer type;
 
     @PostMapping("/create-order")
     BaseResponseModel<Integer> createOrder(@RequestBody OrderModel model) {
         return orderService.createOrder(model);
     }
 
-    @GetMapping("/get-by-order-id/{id}")
-    BaseListResponseModel<List<OrderDetailGetListMapper>> getByOrderIds(@PathVariable Integer id) {
-        return orderDetailService.getListByOrderId(id);
+    @GetMapping("/get-by-order-id")
+    BaseResponseModel<OrderModel> getByOrderIds(@RequestParam(name = "id", required = false) Integer id) {
+        return orderDetailService.getDetail(id);
     }
 
     @GetMapping("/get-list-order")
@@ -46,7 +49,18 @@ public class OrderController {
                                                                     @RequestParam(name = "endDate", required = false) Date endDate,
                                                                     @RequestParam(name = "pageIndex", required = true) Integer pageIndex,
                                                                     @RequestParam(name = "pageSize", required = true) Integer pageSize) {
-        Pageable pageable = PageRequest.of(pageIndex, pageSize);
+        this.type = type;
+        Pageable pageable = PageRequest.of(pageIndex - 1, pageSize, Sort.by("orderId").descending());
         return orderService.getListOrders(userId, paymentId, employeeId, status, stage, type, startPrice, endPrice, startDate, endDate, pageable);
+    }
+    @GetMapping("/generate-code")
+    public BaseResponseModel<String> generateCode() {
+        return orderService.generateCode();
+    }
+    @GetMapping("/change-status")
+    public BaseResponseModel<Integer> changeStatus(@RequestParam(value = "id", required = false) Integer id,
+                                             @RequestParam(value = "status",  required = false) Integer status,
+                                             @RequestParam(value = "description",  required = false) String description) {
+        return orderService.updateStatus(id, status, description);
     }
 }

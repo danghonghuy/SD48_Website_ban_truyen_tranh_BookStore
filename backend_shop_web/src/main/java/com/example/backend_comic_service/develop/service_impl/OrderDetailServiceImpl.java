@@ -1,16 +1,13 @@
 package com.example.backend_comic_service.develop.service_impl;
 
 import com.example.backend_comic_service.develop.constants.OrderStatusEnum;
-import com.example.backend_comic_service.develop.entity.OrderDetailEntity;
-import com.example.backend_comic_service.develop.entity.OrderEntity;
-import com.example.backend_comic_service.develop.entity.ProductEntity;
-import com.example.backend_comic_service.develop.entity.UserEntity;
+import com.example.backend_comic_service.develop.entity.*;
 import com.example.backend_comic_service.develop.model.base_response.BaseListResponseModel;
+import com.example.backend_comic_service.develop.model.base_response.BaseResponseModel;
 import com.example.backend_comic_service.develop.model.mapper.OrderDetailGetListMapper;
 import com.example.backend_comic_service.develop.model.model.OrderDetailModel;
-import com.example.backend_comic_service.develop.repository.OrderDetailRepository;
-import com.example.backend_comic_service.develop.repository.OrderRepository;
-import com.example.backend_comic_service.develop.repository.ProductRepository;
+import com.example.backend_comic_service.develop.model.model.OrderModel;
+import com.example.backend_comic_service.develop.repository.*;
 import com.example.backend_comic_service.develop.service.IOrderDetailService;
 import com.example.backend_comic_service.develop.validator.OrderDetailValidator;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -36,6 +34,11 @@ public class OrderDetailServiceImpl implements IOrderDetailService {
     private OrderDetailValidator orderDetailValidator;
     @Autowired
     private ProductRepository productRepository;
+    @Autowired
+    private CouponRepository couponRepository;
+    @Autowired
+    private LogActionOrderRepository logActionOrderRepository;
+
     @Override
     public int bulkInsertOrderDetail(List<OrderDetailModel> models, OrderEntity orderEntity, UserEntity userEntity) {
        try{
@@ -101,6 +104,37 @@ public class OrderDetailServiceImpl implements IOrderDetailService {
                 response.successResponse(null, "List is empty");
             }
             response.successResponse(orderDetailGetListMappers, "Success");
+            return response;
+        }
+        catch (Exception e){
+            log.error(e.getMessage());
+            response.errorResponse(e.getMessage());
+            return response;
+        }
+    }
+
+    @Override
+    public BaseResponseModel<OrderModel> getDetail(Integer id) {
+        BaseResponseModel<OrderModel> response = new BaseResponseModel<>();
+        try{
+            OrderEntity orderEntity = orderRepository.findById(id).orElse(null);
+            if(orderEntity == null){
+                response.successResponse(null, null);
+                return response;
+            }
+
+            OrderModel orderModel = orderEntity.toModel();
+
+            List<LogActionOrderEntity> logActionOrderEntities = logActionOrderRepository.findByOrderId(orderModel.getId());
+
+            if(!logActionOrderEntities.isEmpty()){
+                orderModel.setLogActionOrderModels(logActionOrderEntities.stream().map(LogActionOrderEntity::toModel).collect(Collectors.toList()));
+            }
+            CouponEntity couponEntity = couponRepository.findById(orderModel.getCouponId()).orElse(null);
+            if(couponEntity != null){
+                orderModel.setCouponModel(couponEntity.toCouponModel());
+            }
+            response.successResponse(orderModel, "Success");
             return response;
         }
         catch (Exception e){
