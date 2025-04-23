@@ -20,6 +20,7 @@ import TextArea from "antd/es/input/TextArea";
 import useProduct from "@api/useProduct";
 import useCategory from "@api/useCategory";
 import { format } from "date-fns";
+import dayjs from "dayjs";
 
 const DiscountAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
   const { generateCode, addOrChange } = useDiscount();
@@ -93,18 +94,30 @@ const DiscountAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
         code: modelItem.code,
         name: modelItem.name,
         description: modelItem.description,
-        typeId: modelItem.type,
-        couponAmount:
+        type: modelItem.type,
+        moneyDiscount:
           modelItem.type === 1 ? modelItem.percent : modelItem.moneyDiscount,
+        percent: modelItem.type === 1 ? modelItem.percent : null,
+        startDate: modelItem.startDate
+          ? dayjs(modelItem.startDate, "YYYY-MM-DD HH:mm:ss")
+          : null,
+        endDate: modelItem.endDate
+          ? dayjs(modelItem.endDate, "YYYY-MM-DD HH:mm:ss")
+          : null,
       });
-      setStartDate(new Date(modelItem.startDate));
-      setEndDate(new Date(modelItem.endDate));
+      setStartDate(modelItem.startDate);
+      setEndDate(modelItem.endDate);
       if (modelItem && modelItem.productIds) {
         setProductIdSelected(modelItem.productIds);
       }
     } else {
       fetchGenerateCode();
       setTypeProductDiscount(1);
+      form.setFieldsValue({
+        type: 1,
+        status: 1,
+        isDeleted: 0,
+      });
     }
     fetchProduct();
     setModal2Open(true);
@@ -115,53 +128,102 @@ const DiscountAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
     }
   }, [tableParams, typeProductDiscount]);
 
-  const handleSetEndDate = (date) => {
-    setEndDate(date.format());
+  const handleSetEndDate = (date, dateString) => {
+    if (date) {
+      // Sử dụng định dạng chuẩn ISO 8601
+      const formattedDate = date.format("DD/MM/YYYY HH:mm:ss");
+      setEndDate(formattedDate);
+      console.log("End date set to:", formattedDate);
+    } else {
+      setEndDate(null);
+    }
   };
 
-  const handleSetStartDate = (date) => {
-    setStartDate(date.format());
+  const handleSetStartDate = (date, dateString) => {
+    if (date) {
+      // Sử dụng định dạng chuẩn ISO 8601
+      const formattedDate = date.format("DD/MM/YYYY HH:mm:ss");
+      setStartDate(formattedDate);
+      console.log("Start date set to:", formattedDate);
+    } else {
+      setStartDate(null);
+    }
   };
+
+  const checkStartDate = (_, value) => {
+    if (dayjs(startDate).isAfter(dayjs(endDate))) {
+      return Promise.reject(
+        new Error("Ngày bắt đầu phải trước ngày kết thúc!")
+      );
+    }
+    return Promise.resolve();
+  };
+
+  const checkEndDate = (_, value) => {
+    if (dayjs(endDate).isBefore(dayjs(startDate))) {
+      return Promise.reject(new Error("Ngày kết thúc phải sau ngày bắt đầu!"));
+    }
+    return Promise.resolve();
+  };
+
   const onFinish = async (values) => {
+    console.log("🚀 ~ onFinish ~ values:", values);
     try {
-      debugger;
       if (productIdSelected === null || productIdSelected.length === 0) {
         toast.error("Vui lòng chọn sản phẩm cho trương chình khuyến mại");
         return;
       }
+
+      if (!startDate || !endDate) {
+        toast.error("Vui lòng chọn thời gian bắt đầu và kết thúc");
+        return;
+      }
+
+      // Create the object to match backend entity fields
       var objectModel = {
         name: values.name,
         description: values.description,
-        type: values.typeId,
-        startDate: startDate,
-        endDate: endDate,
-        moneyDiscount: values.couponAmount,
+        type: values.type,
+        startDate: dayjs(values.startDate),
+        endDate: dayjs(values.endDate),
         status: 1,
         isDeleted: 0,
         id: modelItem ? modelItem.id : null,
         code: values.code,
-        percent: values.couponAmount,
-        status: 1,
-        isDeleted: 0,
         productIds: productIdSelected,
       };
+
+      // Set moneyDiscount or percent based on type
+      if (values.type === 1) {
+        objectModel.percent = parseInt(values.moneyDiscount);
+        objectModel.moneyDiscount = 0;
+      } else {
+        objectModel.moneyDiscount = parseInt(values.moneyDiscount);
+        objectModel.percent = 0;
+      }
+
+      console.log("Sending to server:", objectModel);
+
       const { success, data } = await addOrChange(objectModel);
-      if (data.status != "Error" && success) {
+      if (data.success) {
         setModal2Open(false);
         toast.success(data.message);
         fetchData();
       } else {
-        toast.error(data.message);
+        toast.error(
+          data.message || "Dữ liệu đầu vào không hợp lệ. Xin vui lòng thử lại"
+        );
       }
     } catch (error) {
-      toast.error(error);
+      console.error("Form submission error:", error);
+      toast.error(error.message || "Có lỗi xảy ra khi xử lý");
     }
   };
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
   };
   const handleChange = (value) => {
-    console.log(`Selected: ${value}`);
+    form.setFieldsValue({ type: value });
   };
 
   const handleSelectedAll = (event) => {
@@ -176,7 +238,7 @@ const DiscountAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
     if (event.target.checked) {
       models.push(id);
     } else {
-      models.filter((e) => e != id);
+      models = models.filter((e) => e != id);
     }
     setProductIdSelected(models);
   };
@@ -281,7 +343,7 @@ const DiscountAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
         width={"60%"}
         title="Thêm mới"
         centered
-        visible={modal2Open}
+        open={modal2Open}
         onCancel={() => setModal2Open(false)}
         footer={null}
         bodyStyle={{
@@ -303,19 +365,19 @@ const DiscountAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
                 label="Mã khuyến mại"
                 name="code"
                 rules={[
-                  { required: true, message: "Please input Coupon code!" },
+                  { required: true, message: "Vui lòng nhập mã đợt giảm giá!" },
                 ]}
               >
-                <Input placeholder="" readOnly={true} />
+                <Input placeholder="" readOnly />
               </Form.Item>
             </Col>
 
             <Col span={12}>
               <Form.Item
-                label="Tên khuyến mại"
+                label="Tên đợt giảm giá"
                 name="name"
                 rules={[
-                  { required: true, message: "Please input Coupon name!" },
+                  { required: true, message: "Vui lòng nhập tên đợt giảm giá!" },
                 ]}
               >
                 <Input placeholder="" />
@@ -325,8 +387,8 @@ const DiscountAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
             <Col span={12}>
               <Form.Item
                 label="Loại khuyến mại"
-                name="typeId"
-                rules={[{ required: true, message: "Please select coupon!" }]}
+                name="type"
+                rules={[{ required: true, message: "Vui lòng chọn đợt giảm giá!" }]}
               >
                 <Select
                   placeholder=""
@@ -345,9 +407,9 @@ const DiscountAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
             <Col span={12}>
               <Form.Item
                 label="Giá trị"
-                name="couponAmount"
+                name="moneyDiscount"
                 rules={[
-                  { required: true, message: "Please input Coupon amount!" },
+                  { required: true, message: "Vui lòng nhập số tiền đợt giảm giá!" },
                 ]}
               >
                 <Input placeholder="" type="number" />
@@ -355,19 +417,35 @@ const DiscountAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
             </Col>
 
             <Col span={12}>
-              <Form.Item label="Ngày bắt đầu" name="dateStart">
+              <Form.Item
+                label="Ngày bắt đầu"
+                name="startDate"
+                rules={[
+                  { required: true, message: "Vui lòng chọn ngày bắt đầu!" },
+                  { validator: checkStartDate },
+                ]}
+              >
                 <DatePicker
+                  showTime
+                  format="DD-MM-YYYY HH:mm:ss"
                   onChange={handleSetStartDate}
-                  placeholder={startDate && format(startDate, "dd-MM-yyyy")}
                   style={{ width: "100%", height: "40px" }}
                 />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item label="Ngày kết thúc" name="dateEnd">
+              <Form.Item
+                label="Ngày kết thúc"
+                name="endDate"
+                rules={[
+                  { required: true, message: "Vui lòng chọn ngày kết thúc!" },
+                  { validator: checkEndDate },
+                ]}
+              >
                 <DatePicker
+                  showTime
+                  format="DD-MM-YYYY HH:mm:ss"
                   onChange={handleSetEndDate}
-                  placeholder={endDate && format(endDate, "dd-MM-yyyy")}
                   style={{ width: "100%", height: "40px" }}
                 />
               </Form.Item>
@@ -382,7 +460,7 @@ const DiscountAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
           <Row gutter={[5, 5]}>
             <Col span={16}>
               <span
-                class="hide-menu"
+                className="hide-menu"
                 style={{ fontSize: "13px", color: "black", fontWeight: "bold" }}
               >
                 Thông tin sản phẩm khuyến mại
@@ -390,26 +468,6 @@ const DiscountAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
             </Col>
           </Row>
           <br />
-          {/* <Row>
-            <Col span={6}>
-              <span class="hide-menu" style={{ fontSize: "13px", color: "black", fontWeight: "normal" }}>Chọn sản phẩm khuyến mại</span>
-            </Col>
-            <Col span={18}>
-              <Select
-                value={typeProductDiscount}
-                placeholder=""
-                onChange={handeSelectTypeDiscountProd}
-                style={{
-                  width: '100%'
-                }}
-              >
-                <Option value={1}>Khuyến mại theo loại sản phẩm</Option>
-                <Option value={2}>Khuyến mại theo giá trị sản phẩm</Option>
-                <Option value={3}>Khuyến mại theo sản phẩm được chọn</Option>
-              </Select>
-
-            </Col>
-          </Row> */}
 
           <Row gutter={[5, 5]}>
             <Col span={24}>
@@ -418,7 +476,7 @@ const DiscountAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
                 rules={[{ required: false, message: "" }]}
               >
                 <Input
-                  placeholder="Enter code, product name.."
+                  placeholder="Nhập mã, tên sản phẩm.."
                   onChange={(e) => handleChangeSearchNameProd(e)}
                 />
               </Form.Item>
@@ -428,7 +486,7 @@ const DiscountAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
             dataSource={product}
             columns={columns}
             pagination={false}
-            loading={false}
+            loading={loading}
             onChange={null}
           />
           <Pagination

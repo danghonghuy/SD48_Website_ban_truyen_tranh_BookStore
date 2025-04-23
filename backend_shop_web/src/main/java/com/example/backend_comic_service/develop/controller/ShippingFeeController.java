@@ -1,6 +1,6 @@
 package com.example.backend_comic_service.develop.controller;
 
-import com.example.backend_comic_service.develop.entity.StatusFeeEnum;
+import com.example.backend_comic_service.develop.enums.StatusFeeEnum;
 import com.example.backend_comic_service.develop.exception.ResponseFactory;
 import com.example.backend_comic_service.develop.model.base_response.BaseListResponseModel;
 import com.example.backend_comic_service.develop.model.dto.ShippingFeeDTO;

@@ -30,7 +30,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public BaseResponseModel<Integer> register(@RequestPart(name = "model") String model, @RequestPart(name = "files") List<MultipartFile> file) {
+    public BaseResponseModel<Integer> register(@RequestPart(name = "model") String model, @RequestPart(name = "files", required = false) List<MultipartFile> file) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

@@ -1,5 +1,7 @@
 package com.example.backend_comic_service.develop.configs.configs_sercurity_service;
 
+import com.example.backend_comic_service.develop.exception.ServiceException;
+import com.example.backend_comic_service.develop.utils.ErrorCodeConst;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -73,12 +75,23 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts
-                .parser()
-                .setSigningKey(getSignInKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            return Jwts
+                    .parser()
+                    .setSigningKey(getSignInKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException e) {
+            log.error("Token expired ");
+            throw new ServiceException(ErrorCodeConst.UNAUTHORIZED, null);
+        } catch (SignatureException e) {
+            log.error("SignatureException: {}", e.getMessage());
+            throw new ServiceException(ErrorCodeConst.UNAUTHORIZED, null);
+        } catch(Exception e){
+            log.error("Exception: {}", e.getMessage());
+            throw new ServiceException(ErrorCodeConst.UNAUTHORIZED, null);
+        }
     }
 
     private Key getSignInKey() {

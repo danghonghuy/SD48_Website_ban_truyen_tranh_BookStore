@@ -22,6 +22,7 @@ import org.springframework.util.StringUtils;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,10 +75,10 @@ public class DiscountServiceImpl implements IDiscountService {
             }else{
                 discountEntity = discountModel.toEntity();
                 discountEntity.setCreatedBy(userEntity.getId());
-                discountEntity.setCreatedDate(Date.valueOf(LocalDate.now()));
+                discountEntity.setCreatedDate(LocalDateTime.now());
             }
             discountEntity.setUpdatedBy(userEntity.getId());
-            discountEntity.setUpdatedDate(Date.valueOf(LocalDate.now()));
+            discountEntity.setUpdatedDate(LocalDateTime.now());
             DiscountEntity discount = discountRepository.saveAndFlush(discountEntity);
             if(discount.getId() != null){
                 if(discountModel.getId() != null && discountModel.getId()  > 0){

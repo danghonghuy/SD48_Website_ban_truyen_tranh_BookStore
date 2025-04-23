@@ -2,6 +2,7 @@ package com.example.backend_comic_service.develop.validator;
 
 import com.example.backend_comic_service.develop.entity.CouponEntity;
 import com.example.backend_comic_service.develop.model.model.CouponModel;
+import com.example.backend_comic_service.develop.model.model.CouponRequest;
 import com.example.backend_comic_service.develop.repository.CouponRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -12,7 +13,7 @@ public class CouponValidator {
     @Autowired
     private CouponRepository couponRepository;
 
-    public String validate(CouponModel model) {
+    public String validate(CouponRequest model) {
         if(model == null){
             return "Object model invalid";
         }

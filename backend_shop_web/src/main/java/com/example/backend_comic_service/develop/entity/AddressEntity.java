@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,11 +24,11 @@ public class AddressEntity {
     @Column(name = "address_detail")
     private String addressDetail;
     @Column(name = "created_date")
-    private Date createdDate;
+    private LocalDateTime createdDate;
     @Column(name = "created_by")
     private Integer createdBy;
     @Column(name = "updated_date")
-    private Date updatedDate;
+    private LocalDateTime updatedDate;
     @Column(name = "updated_by")
     private Integer updatedBy;
     @Column(name = "status")

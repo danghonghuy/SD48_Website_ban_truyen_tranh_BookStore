@@ -247,7 +247,7 @@ function BranchManager() {
               ]}
             >
               <Input
-                placeholder="Enter code, name category"
+                placeholder="Nhập mã, tên thể loại"
                 onChange={(e) => handleChangeName(e)}
               />
             </Form.Item>
@@ -256,7 +256,7 @@ function BranchManager() {
             <Form.Item label="Trạng thái" name="status">
               <Select
                 value={tableParams.pagination.status}
-                placeholder="Please select"
+                placeholder="Chọn trạng thái"
                 onChange={handleChangeSelect}
                 style={{
                   width: "100%",

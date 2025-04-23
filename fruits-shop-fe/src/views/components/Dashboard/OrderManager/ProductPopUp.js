@@ -13,6 +13,7 @@ import {
 import React, { useEffect, useState } from "react";
 import useProduct from "@api/useProduct";
 import { toast } from "react-toastify";
+import { getMediaUrl } from "@constants/commonFunctions";
 
 const ProductPopUp = ({ handleProductSelected, modelProduct, tabIndex }) => {
   const [modal2Open, setModal2Open] = useState(false);
@@ -26,14 +27,18 @@ const ProductPopUp = ({ handleProductSelected, modelProduct, tabIndex }) => {
       pageIndex: 1,
       pageSize: 5,
       keySearch: "",
+      status: 1,
     },
   });
   const [productSelecteds, setProductIdSelected] = useState([]);
+  const [localModelProduct, setLocalModelProduct] = useState([]);
 
   const fetchData = async () => {
+    setLoading(true);
     const { success, data } = await getList(tableParams.pagination);
     if (!success || data.status == "Error") {
       toast.error("Có lỗi xảy ra");
+      setLoading(false);
     } else {
       setProduct(data.data);
       setLoading(false);
@@ -42,29 +47,37 @@ const ProductPopUp = ({ handleProductSelected, modelProduct, tabIndex }) => {
   };
 
   const showModel = () => {
-    if (!modelProduct || modelProduct.length === 0) {
-      modelProduct = [];
-    }
+    // Tạo bản sao của modelProduct để không thay đổi trực tiếp props
+    const currentModelProduct = Array.isArray(modelProduct)
+      ? [...modelProduct]
+      : [];
+    setLocalModelProduct(currentModelProduct);
     setModal2Open(true);
     fetchData();
     setProductIdSelected([]);
   };
 
   const onFinish = () => {
-    var modelProductSeleted = [...productSelecteds];
-    if (modelProductSeleted && modelProductSeleted.length > 0) {
-      modelProductSeleted.forEach((item) => {
-        var index = modelProduct.findIndex((m) => m.id === item.id);
-        if (index !== -1) {
-          modelProduct[index].quantity =
-            modelProduct[index].quantity + modelProductSeleted[index].quantity;
-        } else {
-          modelProduct.push(item);
-        }
-      });
-      handleProductSelected(modelProduct, tabIndex);
-    } else {
+    if (!productSelecteds || productSelecteds.length === 0) {
+      setModal2Open(false);
+      return;
     }
+
+    const updatedModelProduct = [...localModelProduct];
+
+    // Xử lý các sản phẩm đã chọn
+    productSelecteds.forEach((item) => {
+      const index = updatedModelProduct.findIndex((m) => m.id === item.id);
+      if (index !== -1) {
+        updatedModelProduct[index].quantity += item.quantity;
+      } else {
+        updatedModelProduct.push(item);
+      }
+    });
+
+    // Cập nhật state và gọi callback
+    setLocalModelProduct(updatedModelProduct);
+    handleProductSelected(updatedModelProduct, tabIndex);
     setModal2Open(false);
   };
 
@@ -72,7 +85,7 @@ const ProductPopUp = ({ handleProductSelected, modelProduct, tabIndex }) => {
     if (modal2Open) {
       fetchData();
     }
-  }, [JSON.stringify(tableParams), loading]);
+  }, [JSON.stringify(tableParams), modal2Open]);
 
   const handleTableChange = (pagination, filters, sorter) => {
     setTableParams({
@@ -103,77 +116,84 @@ const ProductPopUp = ({ handleProductSelected, modelProduct, tabIndex }) => {
       currency: "VND",
     }).format(amount);
   }
+
   const handleSelectedAll = (event) => {
     if (event.target.checked) {
-      const checkOutStock = product.findIndex((e) => e.stock === 1);
-      if (checkOutStock !== -1) {
+      // Kiểm tra trước khi chọn tất cả
+      for (const item of product) {
         const quantityChosing =
-          productSelecteds?.[checkOutStock]?.quantity || 0;
-        const quantityChosed = modelProduct?.[checkOutStock]?.quantity || 0;
-        if (
-          product?.[checkOutStock]?.stock -
-            quantityChosing -
-            quantityChosed -
-            1 <
-          0
-        ) {
-          toast.error("Hết hàng");
+          productSelecteds.find((p) => p.id === item.id)?.quantity || 0;
+        const quantityChosed =
+          localModelProduct.find((p) => p.id === item.id)?.quantity || 0;
+
+        if (item.stock - quantityChosing - quantityChosed - 1 < 0) {
+          toast.error(`Sản phẩm "${item.name}" đã hết hàng`);
           return;
         }
       }
-      const result = product.map((item) => {
-        return {
-          id: item.id,
-          image: item.images && item.images.length > 0 ? item.images[0] : null,
-          name: item.name,
-          price: item.price,
-          code: item.code,
-          priceDiscount: item.priceDiscount,
-          quantity: 1,
-        };
-      });
+
+      // Nếu tất cả sản phẩm đều có đủ số lượng, thêm vào danh sách đã chọn
+      const result = product.map((item) => ({
+        id: item.id,
+        image: item.images && item.images.length > 0 ? item.images[0] : null,
+        name: item.name,
+        price: item.discountDTO?.moneyDiscount
+          ? item.price - item.discountDTO?.moneyDiscount
+          : item.price,
+        code: item.code,
+        priceDiscount: item.discountDTO?.moneyDiscount || 0,
+        quantity: 1,
+        stock: item.stock,
+      }));
       setProductIdSelected(result);
     } else {
       setProductIdSelected([]);
     }
   };
+
   const handleChangeSelected = (event, item) => {
     if (event.target.checked) {
-      var quantityChosing =
-        productSelecteds.findIndex((e) => e.id === item.id) !== -1
-          ? productSelecteds.find((e) => e.id === item.id).quantity
-          : 0;
-      var quantityChosed =
-        modelProduct.findIndex((e) => e.id === item.id) !== -1
-          ? modelProduct.find((e) => e.id === item.id).quantity
-          : 0;
+      const quantityChosing =
+        productSelecteds.find((p) => p.id === item.id)?.quantity || 0;
+      const quantityChosed =
+        localModelProduct.find((p) => p.id === item.id)?.quantity || 0;
+
       if (item.stock - quantityChosed - quantityChosing - 1 < 0) {
-        toast.error("Hết hàng");
+        toast.error(`Sản phẩm "${item.name}" đã hết hàng`);
         return;
       }
+
+      // Nếu đã chọn sản phẩm này trước đó, xóa nó khỏi danh sách
+      const filteredProducts = productSelecteds.filter((p) => p.id !== item.id);
+
+      // Thêm sản phẩm vào danh sách đã chọn
       setProductIdSelected([
-        ...productSelecteds,
+        ...filteredProducts,
         {
           id: item.id,
           image: item.images && item.images.length > 0 ? item.images[0] : null,
           name: item.name,
-          price: item.price,
+          price: item.discountDTO?.moneyDiscount
+            ? item.price - item.discountDTO?.moneyDiscount
+            : item.price,
           code: item.code,
-          priceDiscount: item.priceDiscount,
+          priceDiscount: item.discountDTO?.moneyDiscount || 0,
           quantity: 1,
+          stock: item.stock,
         },
       ]);
     } else {
-      setProductIdSelected(
-        [...productSelecteds].filter((e) => e.id != item.id)
-      );
+      // Xóa sản phẩm khỏi danh sách đã chọn
+      setProductIdSelected(productSelecteds.filter((p) => p.id !== item.id));
     }
   };
+
   const onShowSizeChange = (current, pageSize) => {
     setTableParams({
       pagination: {
         pageIndex: current,
         pageSize: pageSize,
+        keySearch: tableParams.pagination.keySearch,
       },
     });
   };
@@ -186,10 +206,7 @@ const ProductPopUp = ({ handleProductSelected, modelProduct, tabIndex }) => {
       render: (_, record) => {
         return (
           <Checkbox
-            checked={
-              productSelecteds &&
-              productSelecteds.find((e) => e.id === record.id)
-            }
+            checked={productSelecteds.some((p) => p.id === record.id)}
             onClick={(e) => handleChangeSelected(e, record)}
           ></Checkbox>
         );
@@ -201,7 +218,11 @@ const ProductPopUp = ({ handleProductSelected, modelProduct, tabIndex }) => {
       key: "images",
       render: (_, record) => (
         <img
-          src={Array.isArray(record.images) ? record.images[0] : "href"}
+          src={
+            Array.isArray(record.images)
+              ? getMediaUrl(record.images[0])
+              : "href"
+          }
           style={{ width: "65px", height: "auto", borderRadius: "10px" }}
         />
       ),
@@ -229,9 +250,20 @@ const ProductPopUp = ({ handleProductSelected, modelProduct, tabIndex }) => {
     {
       title: "Giá sản phẩm",
       dataIndex: "price",
-      render: (text) => (
+      render: (text, record) => (
         <p style={{ fontSize: "13px", color: "black", fontWeight: "300" }}>
-          {formatCurrencyVND(text)}
+          {record.discountDTO?.moneyDiscount > 0 ? (
+            <>
+              <span className="text-decoration-line-through">
+                {formatCurrencyVND(record.price)}
+              </span>{" "}
+              <span>
+                {formatCurrencyVND(text - record.discountDTO?.moneyDiscount)}
+              </span>
+            </>
+          ) : (
+            <>{formatCurrencyVND(text)}</>
+          )}
         </p>
       ),
     },
@@ -240,17 +272,13 @@ const ProductPopUp = ({ handleProductSelected, modelProduct, tabIndex }) => {
       dataIndex: "stock",
       key: "stock",
       render: (_, record) => {
-        var quantityChosing =
-          productSelecteds.findIndex((e) => e.id === record.id) !== -1
-            ? productSelecteds.find((e) => e.id === record.id).quantity
-            : 0;
-        var quantityChosed =
-          modelProduct.findIndex((e) => e.id === record.id) !== -1
-            ? modelProduct.find((e) => e.id === record.id).quantity
-            : 0;
+        const quantityChosing =
+          productSelecteds.find((p) => p.id === record.id)?.quantity || 0;
+        const quantityChosed =
+          localModelProduct.find((p) => p.id === record.id)?.quantity || 0;
         return (
           <p style={{ fontSize: "13px", color: "black", fontWeight: "300" }}>
-            {record.stock - (quantityChosing ?? 0) - (quantityChosed ?? 0)}
+            {record.stock - quantityChosing - quantityChosed}
           </p>
         );
       },
@@ -266,6 +294,7 @@ const ProductPopUp = ({ handleProductSelected, modelProduct, tabIndex }) => {
       ),
     },
   ];
+
   return (
     <div>
       <Button

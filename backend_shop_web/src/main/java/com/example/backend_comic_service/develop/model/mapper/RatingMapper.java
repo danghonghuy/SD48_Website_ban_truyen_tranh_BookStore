@@ -3,6 +3,7 @@ package com.example.backend_comic_service.develop.model.mapper;
 import lombok.*;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,9 +16,9 @@ public class RatingMapper {
     private Integer userId;
     private Integer rate;
     private String description;
-    private Date createdDate;
+    private LocalDateTime createdDate;
     private Integer createdBy;
-    private Date updatedDate;
+    private LocalDateTime updatedDate;
     private Integer updatedBy;
     private Integer status;
     private Integer isDelete;

@@ -18,6 +18,7 @@ import org.springframework.util.StringUtils;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -66,10 +67,10 @@ public class PaymentServiceImpl implements IPaymentService {
             }
             if(Optional.ofNullable(paymentModel.getId()).orElse(0) <= 0){
                 paymentEntity.setCreatedBy(userEntity.getId());
-                paymentEntity.setCreatedDate(Date.valueOf(LocalDate.now()));
+                paymentEntity.setCreatedDate(LocalDateTime.now());
             }
             paymentEntity.setUpdatedBy(userEntity.getId());
-            paymentEntity.setUpdatedDate(Date.valueOf(LocalDate.now()));
+            paymentEntity.setUpdatedDate(LocalDateTime.now());
             PaymentEntity savedPaymentEntity = paymentRepository.saveAndFlush(paymentEntity);
             if(savedPaymentEntity.getId() != null){
                  if(paymentModel.getId() != null){

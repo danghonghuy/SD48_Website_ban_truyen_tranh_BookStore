@@ -9,6 +9,7 @@ import lombok.Setter;
 import org.aspectj.weaver.ast.Or;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -32,11 +33,11 @@ public class OrderDetailEntity {
     @Column(name = "total")
     private Integer total;
     @Column(name = "created_date")
-    private Date createdDate;
+    private LocalDateTime createdDate;
     @Column(name = "created_by")
     private Integer createdBy;
     @Column(name = "updated_date")
-    private Date updatedDate;
+    private LocalDateTime updatedDate;
     @Column(name = "updated_by")
     private Integer updatedBy;
     @Column(name = "status")

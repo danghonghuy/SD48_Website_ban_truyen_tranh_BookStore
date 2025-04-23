@@ -84,7 +84,7 @@ const AddBranch = ({ fechtList, modelItem, textButton }) => {
   return (
     <>
       {" "}
-      <div>
+      <div style={{ display: "inline-block" }}>
         <Button
           type="primary"
           value="large"
@@ -98,7 +98,7 @@ const AddBranch = ({ fechtList, modelItem, textButton }) => {
         </Button>
 
         <Modal
-          title="Thêm mới loại sách"
+          title="Thêm mới thể loại truyện"
           centered
           visible={modal2Open}
           onCancel={() => setModal2Open(false)}
@@ -114,10 +114,10 @@ const AddBranch = ({ fechtList, modelItem, textButton }) => {
             <Row gutter={[16, 16]}>
               <Col span={24}>
                 <Form.Item
-                  label="Code"
+                  label="Mã thể loại"
                   name="code"
                   rules={[
-                    { required: true, message: "Please input category code!" },
+                    { required: true, message: "Vui lòng nhập mã thể loại!" },
                   ]}
                 >
                   <Input
@@ -132,10 +132,10 @@ const AddBranch = ({ fechtList, modelItem, textButton }) => {
                 <Form.Item
                   label="Danh mục"
                   name="catalogId"
-                  rules={[{ required: true, message: "Please select catalog" }]}
+                  rules={[{ required: true, message: "Vui lòng chọn danh mục" }]}
                 >
                   <Select
-                    placeholder="Please select"
+                    placeholder="Chọn danh mục"
                     onChange={null}
                     style={{
                       width: "100%",
@@ -152,10 +152,10 @@ const AddBranch = ({ fechtList, modelItem, textButton }) => {
                   label="Tên thể loại"
                   name="name"
                   rules={[
-                    { required: true, message: "Please input category name!" },
+                    { required: true, message: "Vui lòng nhập tên thể loại!" },
                   ]}
                 >
-                  <Input placeholder="Please input category name" />
+                  <Input placeholder="Nhập tên thể loại" />
                 </Form.Item>
               </Col>
             </Row>
@@ -168,18 +168,18 @@ const AddBranch = ({ fechtList, modelItem, textButton }) => {
                   rules={[
                     {
                       required: true,
-                      message: "Please input category description!",
+                      message: "Vui lòng nhập mô tả thể loại!",
                     },
                   ]}
                 >
-                  <Input placeholder="Please input category description" />
+                  <Input placeholder="Nhập mô tả thể loại" />
                 </Form.Item>
               </Col>
             </Row>
 
             <Form.Item>
               <Button type="primary" htmlType="submit">
-                Cập nhật
+                Thêm
               </Button>
             </Form.Item>
           </Form>

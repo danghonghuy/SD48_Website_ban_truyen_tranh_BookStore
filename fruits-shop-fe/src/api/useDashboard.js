@@ -1,12 +1,12 @@
 import useRequest from "./useRequest"
 const useDashboard = () => {
-    const {createGetRequest} = useRequest('Sastis');
-    const get = async () => createGetRequest({
-        endpoint: '/dashboard',
+    const { createGetRequest } = useRequest('home');
+    const getStatistical = async (code) => createGetRequest({
+        endpoint: `${code}/statistical`,
     })
-  
+
     return {
-        get
+        getStatistical
     }
 }
 export default useDashboard

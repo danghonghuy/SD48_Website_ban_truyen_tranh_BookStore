@@ -5,11 +5,14 @@ import {
   deleteProductFromCart,
   increaseQuantity,
 } from "../../services/redux/cartSlice/productSlice";
-
+import { getMediaUrl } from "@constants/commonFunctions";
 
 function formatCurrencyVND(amount) {
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-} 
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(amount);
+}
 const CartItem = ({ id, imgSrc, name, price, count }) => {
   const dispatch = useDispatch();
   const handleIncreamentQuality = () => {
@@ -50,7 +53,7 @@ const CartItem = ({ id, imgSrc, name, price, count }) => {
         <th scope="row">
           <div className="d-flex align-items-center">
             <img
-              src={imgSrc}
+              src={getMediaUrl(imgSrc)}
               className="img-fluid me-5 rounded-circle"
               style={{ width: "80px", height: "80px" }}
               alt=""
@@ -89,7 +92,9 @@ const CartItem = ({ id, imgSrc, name, price, count }) => {
           </div>
         </td>
         <td>
-          <p className="mb-0 mt-4">{formatCurrencyVND((price * count).toFixed(2))}</p>
+          <p className="mb-0 mt-4">
+            {formatCurrencyVND((price * count).toFixed(2))}
+          </p>
         </td>
         <td>
           <button

@@ -24,7 +24,7 @@ public class DiscountValidator {
         if(model.getStartDate() == null || model.getEndDate() == null){
             return "Discount model start date or end date is null or empty";
         }
-        if(model.getStartDate().after(model.getEndDate())){
+        if(model.getStartDate().isAfter(model.getEndDate())){
             return "Discount model start date must be smaller or equal to endDate";
         }
         if(model.getId() == null || model.getId() == 0){

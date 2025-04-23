@@ -23,6 +23,7 @@ import org.springframework.util.StringUtils;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -87,7 +88,7 @@ public class CategoryServiceImpl implements ICategoryService {
                 if(Optional.ofNullable(categoryModel.getId()).orElse(0) == 0){
                     categoryEntity = categoryModel.categoryEntity();
                     categoryModel.setCreatedBy(userCreate.getId());
-                    categoryModel.setCreatedDate(Date.valueOf(LocalDate.now()));
+                    categoryModel.setCreatedDate(LocalDateTime.now());
                 }else{
                     categoryEntity = categoryRepository.findById(categoryModel.getId()).orElse(null);
                     if(categoryEntity == null){
@@ -98,7 +99,7 @@ public class CategoryServiceImpl implements ICategoryService {
                     categoryEntity.setDescription(categoryModel.getDescription());
                 }
                 categoryModel.setUpdatedBy(userCreate.getId());
-                categoryModel.setUpdatedDate(Date.valueOf(LocalDate.now()));
+                categoryModel.setUpdatedDate(LocalDateTime.now());
             } catch (Exception e) {
                 log.error(e.getMessage());
                 response.errorResponse(e.getMessage());

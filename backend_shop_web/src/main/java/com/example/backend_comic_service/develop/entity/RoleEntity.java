@@ -10,6 +10,7 @@ import lombok.Setter;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 
@@ -29,11 +30,11 @@ public class RoleEntity {
     @Column(name = "name")
     private String name;
     @Column(name = "created_date")
-    private Date createdDate;
+    private LocalDateTime createdDate;
     @Column(name = "created_by")
     private Integer createdBy;
     @Column(name = "updated_date")
-    private Date updatedDate;
+    private LocalDateTime updatedDate;
     @Column(name = "updated_by")
     private Integer updatedBy;
     @Column(name = "status")
@@ -46,8 +47,8 @@ public class RoleEntity {
           roleEntity.setId(roleModel.getId());
           roleEntity.setCode(roleModel.getCode());
           roleEntity.setName(roleModel.getName());
-          roleEntity.setCreatedDate(Date.valueOf(LocalDate.now()));
-          roleEntity.setUpdatedDate(Date.valueOf(LocalDate.now()));
+          roleEntity.setCreatedDate(LocalDateTime.now());
+          roleEntity.setUpdatedDate(LocalDateTime.now());
           roleEntity.setStatus(roleModel.getStatus());
           roleEntity.setIsDelete(roleModel.getIsDeleted());
           return roleEntity;

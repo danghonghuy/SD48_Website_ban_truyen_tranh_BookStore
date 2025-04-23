@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -25,11 +26,11 @@ public class ImageEntity {
     @JoinColumn(name = "product_id")
     private ProductEntity productEntity;
     @Column(name = "created_date")
-    private Date createdDate;
+    private LocalDateTime createdDate;
     @Column(name = "created_by")
     private Integer createdBy;
     @Column(name = "update_date")
-    private Date updateDate;
+    private LocalDateTime updateDate;
     @Column(name = "update_by")
     private Integer updateBy;
     @Column(name = "status")

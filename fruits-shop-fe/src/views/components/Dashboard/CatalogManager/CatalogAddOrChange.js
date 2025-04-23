@@ -92,7 +92,7 @@ const CatalogAddOrChange = ({ fechtList, modelItem, text }) => {
                   label="Code"
                   name="code"
                   rules={[
-                    { required: true, message: "Please input category code!" },
+                    { required: true, message: "Vui lòng nhập mã danh mục!" },
                   ]}
                 >
                   <Input
@@ -109,10 +109,10 @@ const CatalogAddOrChange = ({ fechtList, modelItem, text }) => {
                   label="Tên danh mục"
                   name="name"
                   rules={[
-                    { required: true, message: "Please input category name!" },
+                    { required: true, message: "Vui lòng nhập tên danh mục!" },
                   ]}
                 >
-                  <Input placeholder="Please input category name" />
+                  <Input placeholder="Vui lòng nhập tên danh mục" />
                 </Form.Item>
               </Col>
             </Row>
@@ -125,18 +125,18 @@ const CatalogAddOrChange = ({ fechtList, modelItem, text }) => {
                   rules={[
                     {
                       required: true,
-                      message: "Please input category description!",
+                      message: "Vui lòng nhập mô tả danh mục!",
                     },
                   ]}
                 >
-                  <Input placeholder="Please input category description" />
+                  <Input placeholder="Vui lòng nhập mô tả danh mục" />
                 </Form.Item>
               </Col>
             </Row>
 
             <Form.Item>
               <Button type="primary" htmlType="submit">
-                Cập nhật
+                Thêm
               </Button>
             </Form.Item>
           </Form>

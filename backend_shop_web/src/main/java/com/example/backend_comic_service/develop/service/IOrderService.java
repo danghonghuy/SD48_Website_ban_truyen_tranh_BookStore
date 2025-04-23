@@ -1,5 +1,6 @@
 package com.example.backend_comic_service.develop.service;
 
+import com.example.backend_comic_service.develop.enums.OrderStatusEnum;
 import com.example.backend_comic_service.develop.model.base_response.BaseListResponseModel;
 import com.example.backend_comic_service.develop.model.base_response.BaseResponseModel;
 import com.example.backend_comic_service.develop.model.mapper.OrderGetListMapper;
@@ -7,11 +8,12 @@ import com.example.backend_comic_service.develop.model.model.OrderModel;
 import org.springframework.data.domain.Pageable;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface IOrderService {
     BaseResponseModel<Integer> createOrder(OrderModel model);
-    BaseListResponseModel<List<OrderGetListMapper>> getListOrders(Integer userId, Integer paymentId, Integer employeeId, Integer status, Integer stage, Integer type, Integer startPrice, Integer endPrice, Date startDate, Date endDate, Pageable pageable);
+    BaseListResponseModel<List<OrderGetListMapper>> getListOrders(Integer userId, Integer paymentId, Integer employeeId, Integer status, Integer stage, Integer type, Integer startPrice, Integer endPrice, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
     BaseResponseModel<String> generateCode();
-    BaseResponseModel<Integer> updateStatus(Integer id, Integer status, String description);
+    BaseResponseModel<Integer> updateStatus(Integer id, OrderStatusEnum status, String description);
 }

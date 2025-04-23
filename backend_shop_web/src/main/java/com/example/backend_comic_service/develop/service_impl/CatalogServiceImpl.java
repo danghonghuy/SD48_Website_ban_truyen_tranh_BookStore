@@ -21,6 +21,7 @@ import org.springframework.util.StringUtils;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -83,10 +84,10 @@ public class CatalogServiceImpl implements ICatalogService {
                 }
                 if(Optional.ofNullable(catalogModel.getId()).orElse(0) == 0){
                     catalogModel.setCreatedBy(userCreate.getId());
-                    catalogModel.setCreatedDate(Date.valueOf(LocalDate.now()));
+                    catalogModel.setCreatedDate(LocalDateTime.now());
                 }
                 catalogModel.setUpdatedBy(userCreate.getId());
-                catalogModel.setUpdatedDate(Date.valueOf(LocalDate.now()));
+                catalogModel.setUpdatedDate(LocalDateTime.now());
             } catch (Exception e) {
                 log.error(e.getMessage());
                 response.errorResponse(e.getMessage());

@@ -3,6 +3,7 @@ package com.example.backend_comic_service.develop.model;
 import com.example.backend_comic_service.develop.entity.CatalogEntity;
 import lombok.*;
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,9 +17,9 @@ public class CatalogModel {
     private String description;
     private Integer status;
     private Integer isDeleted;
-    private Date createdDate;
+    private LocalDateTime createdDate;
     private Integer createdBy;
-    private Date updatedDate;
+    private LocalDateTime updatedDate;
     private Integer updatedBy;
     public CatalogEntity toEntity() {
         CatalogEntity catalogEntity = new CatalogEntity();

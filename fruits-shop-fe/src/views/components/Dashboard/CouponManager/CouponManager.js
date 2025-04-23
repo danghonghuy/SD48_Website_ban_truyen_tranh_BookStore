@@ -181,7 +181,7 @@ function CouponManager() {
       ),
     },
     {
-      title: "Mã khuyến mại",
+      title: "Mã phiếu giảm giá",
       dataIndex: "code",
       key: "code",
       render: (text) => (
@@ -191,7 +191,7 @@ function CouponManager() {
       ),
     },
     {
-      title: "Tên khuyến mại",
+      title: "Tên phiếu giảm giá",
       dataIndex: "name",
       key: "name",
       render: (text) => (
@@ -201,7 +201,7 @@ function CouponManager() {
       ),
     },
     {
-      title: "Kiểu khuyến mại",
+      title: "Kiểu phiếu giảm giá",
       dataIndex: "type",
       render: (value) => {
         if (value === 1) {
@@ -220,24 +220,17 @@ function CouponManager() {
       },
     },
     {
-      title: "Số lượng",
-      dataIndex: "quantity",
-      key: "quantity",
-      render: (_, record) => (
-        <p style={{ fontSize: "13px", color: "black", fontWeight: "300" }}>
-          {record.quantity}
-        </p>
-      ),
-    },
-    {
-      title: "Số lượng đã sử dụng",
-      dataIndex: "quantityUsed",
-      key: "quantityUsed",
-      render: (_, record) => (
-        <p style={{ fontSize: "13px", color: "black", fontWeight: "300" }}>
-          {record.quantityUsed}
-        </p>
-      ),
+      title: "Số lượng còn lại",
+      dataIndex: "remainingQuantity",
+      key: "remainingQuantity",
+      render: (_, record) => {
+        const remaining = record.quantity - record.quantityUsed;
+        return (
+          <p style={{ fontSize: "13px", color: "black", fontWeight: "300" }}>
+            {remaining}
+          </p>
+        );
+      },
     },
     {
       title: "Thời gian bắt đầu",
@@ -264,23 +257,31 @@ function CouponManager() {
       dataIndex: "status",
       key: "status",
       render: (value) => {
+        if (value === 0) {
+          return (
+            <p style={{ fontSize: "13px", color: "black", fontWeight: "300" }}>
+              Đã kết thúc
+            </p>
+          );
+        }
         if (value === 1) {
           return (
             <p style={{ fontSize: "13px", color: "black", fontWeight: "300" }}>
-              Hoạt động
+              Đang diễn ra
             </p>
           );
-        } else {
+        }
+        if (value === 2) {
           return (
             <p style={{ fontSize: "13px", color: "black", fontWeight: "300" }}>
-              Không hoạt động
+              Sắp diễn ra
             </p>
           );
         }
       },
     },
     {
-      title: "Action",
+      title: "Thao tác",
       key: "action",
       render: (_, record) => (
         <Space>
@@ -290,7 +291,7 @@ function CouponManager() {
             textButton={"Sửa"}
             isStyle={true}
           />
-          {record.status === 1 && (
+          {/* {record.status === 1 && (
             <Button
               type={"primary"}
               value="small"
@@ -303,8 +304,8 @@ function CouponManager() {
               {" "}
               Khóa{" "}
             </Button>
-          )}
-          {record.status === 0 && (
+          )} */}
+          {/* {record.status === 0 && (
             <Button
               type={"primary"}
               value="small"
@@ -318,7 +319,7 @@ function CouponManager() {
               {" "}
               Mở khóa{" "}
             </Button>
-          )}
+          )} */}
         </Space>
       ),
     },
@@ -346,7 +347,7 @@ function CouponManager() {
           <Col span={6}>
             <Form.Item label="Trạng thái" name="status">
               <Select
-                placeholder="Please select"
+                placeholder="Chọn trạng thái"
                 onChange={handleChangeStatusSelect}
                 style={{
                   width: "100%",

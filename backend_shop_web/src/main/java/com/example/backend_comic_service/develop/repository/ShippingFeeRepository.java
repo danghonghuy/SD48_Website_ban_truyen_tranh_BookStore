@@ -1,7 +1,7 @@
 package com.example.backend_comic_service.develop.repository;
 
 import com.example.backend_comic_service.develop.entity.ShippingFee;
-import com.example.backend_comic_service.develop.entity.StatusFeeEnum;
+import com.example.backend_comic_service.develop.enums.StatusFeeEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

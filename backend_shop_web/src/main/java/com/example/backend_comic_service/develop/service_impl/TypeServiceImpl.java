@@ -22,6 +22,7 @@ import org.springframework.util.StringUtils;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,7 +60,7 @@ public class TypeServiceImpl implements ITypeService {
                 if(Optional.ofNullable(model.getId()).orElse(0) == 0){
                     typeEntity = model.toEntity();
                     model.setCreatedBy(userCreate.getId());
-                    model.setCreatedDate(Date.valueOf(LocalDate.now()));
+                    model.setCreatedDate(LocalDateTime.now());
                 }else{
                     typeEntity = typeRepository.findById(model.getId()).orElse(null);
                     if(typeEntity == null){
@@ -70,7 +71,7 @@ public class TypeServiceImpl implements ITypeService {
                     typeEntity.setDescription(model.getDescription());
                 }
                 model.setUpdatedBy(userCreate.getId());
-                model.setUpdatedDate(Date.valueOf(LocalDate.now()));
+                model.setUpdatedDate(LocalDateTime.now());
             } catch (Exception e) {
                 log.error(e.getMessage());
                 response.errorResponse(e.getMessage());

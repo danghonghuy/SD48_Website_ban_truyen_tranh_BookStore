@@ -32,9 +32,18 @@ import {
   ORDER_STATUS_LABEL,
 } from "@constants/orderStatusConstant";
 import { useReactToPrint } from "react-to-print";
+import { getMediaUrl } from "@constants/commonFunctions";
+import { Select } from "antd";
+import { Option } from "antd/es/mentions";
+import CustomerUpdatePopup from "./CustomerUpdatePopup";
 const Tab = ({ label, activeTab, setActiveTab, closeTab }) => {
   return <></>;
 };
+
+const statusUpdate = [
+  ORDER_STATUS.ORDER_STATUS_WAITING_ACCEPT,
+  ORDER_STATUS.ORDER_STATUS_ACCEPT,
+];
 
 const OrderDetail = () => {
   const [form] = Form.useForm();
@@ -64,6 +73,7 @@ const OrderDetail = () => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [feeDelivery, setFeeDelivery] = useState(0);
   const [paymentId, setPaymentId] = useState(0);
+  const [payment, setPayment] = useState(null);
   const [deleveryId, setDeleveryId] = useState(0);
   const [discount, setDiscount] = useState(0);
   const [couponModel, setCouponModel] = useState(null);
@@ -79,9 +89,9 @@ const OrderDetail = () => {
       status: null,
     },
   });
-  const [fullName, setFullName] = useState(0);
-  const [phoneNumber, setPhoneNumber] = useState(0);
-  const [email, setEmail] = useState(null);
+  const [fullName, setFullName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
 
   const { getProvince, getDistrict, getWard } = useAddress();
   const [address, setListAddress] = useState([
@@ -173,13 +183,17 @@ const OrderDetail = () => {
         0
       );
       form.setFieldsValue({
-        addressDetail: data.data?.addressModel.fullInfo,
+        addressDetail: data.data?.addressModel?.fullInfo,
         customerName: data.data?.userModel.fullName,
         email: data.data?.userModel.email,
         phoneNumber: data.data?.userModel.phoneNumber,
       });
+      setFullName(data.data?.userModel.fullName);
+      setPhoneNumber(data.data?.userModel.phoneNumber);
+      setEmail(data.data?.userModel.email);
       setCouponModel(data.data?.couponModel);
       setPaymentId(data.data?.paymentModel.id);
+      setPayment(data?.data?.paymentModel);
       setDeleveryId(data.data?.deliveryModel.id);
       setTabs(modelTabs);
       setTotalPrice(sum);
@@ -323,24 +337,24 @@ const OrderDetail = () => {
     try {
       const addressModel = address.map((e) => {
         return {
-          provinceId: e.provinceId,
-          districtId: e.districtId,
-          wardId: e.wardId,
-          addressDetail: e.addressDetail,
+          provinceId: orderModel.addressModel.provinceId,
+          districtId: orderModel.addressModel.districtId,
+          wardId: orderModel.addressModel.wardId,
+          addressDetail: orderModel.addressModel.addressDetail,
           stage: 1,
-          provinceName: e.provinceName,
-          districtName: e.districtName,
-          wardName: e.wardName,
+          provinceName: orderModel.addressModel.provinceName,
+          districtName: orderModel.addressModel.districtName,
+          wardName: orderModel.addressModel.wardName,
           id: e.id,
         };
       });
       const model = {
         code: null,
-        fullName: fullName,
-        phoneNumber: phoneNumber,
-        email: email,
+        fullName: orderModel.userModel.fullName,
+        phoneNumber: orderModel.userModel.phoneNumber,
+        email: orderModel.userModel.email,
         dateBirth: null,
-        userName: phoneNumber,
+        userName: orderModel.userModel.userName,
         gender: false,
         address: addressModel,
         roleId: 8,
@@ -348,7 +362,7 @@ const OrderDetail = () => {
         status: 1,
         id: null,
       };
-      var product = modelProducts.map((e) => {
+      var product = tabs[0].products?.map((e) => {
         return {
           productId: e.id,
           quantity: e.quantity,
@@ -376,6 +390,7 @@ const OrderDetail = () => {
         couponCode: couponModel && couponModel.code,
         userModel: model,
         userType: userModel ? 2 : 1,
+        isChangeOrder: 1,
       };
       const { success, data } = await createOrder(objectModel);
       if (data.status != "Error" && success) {
@@ -443,7 +458,7 @@ const OrderDetail = () => {
     fetchOrderDetail();
     // fetchDelivery();
     // fetchPayment();
-    // fetchProvince();
+    fetchProvince();
   }, [JSON.stringify(tableParams), loading]);
   const handleInputQuantity = (index, value) => {
     const tabIndex = tabs.findIndex((e) => e.id === activeTab);
@@ -485,7 +500,7 @@ const OrderDetail = () => {
       addressDetail:
         userInfo.address &&
         userInfo.address.length > 0 &&
-        userInfo.address[0].fullInfo,
+        userInfo.address[0]?.fullInfo,
     });
     setQuery(option.fullName);
   };
@@ -506,7 +521,7 @@ const OrderDetail = () => {
       key: "images",
       render: (_, record) => (
         <img
-          src={record.image}
+          src={getMediaUrl(record.image)}
           style={{ width: "65px", height: "auto", borderRadius: "10px" }}
         />
       ),
@@ -551,7 +566,8 @@ const OrderDetail = () => {
             style={{ textAlign: "center" }}
             type="number"
             value={record.quantity}
-            readOnly={orderModel && orderModel.status !== 1}
+            min={1}
+            readOnly={orderModel && !statusUpdate.includes(orderModel.status)}
             onChange={(e) => handleInputQuantity(index, e.target.value)}
           ></Input>
         );
@@ -560,7 +576,7 @@ const OrderDetail = () => {
     {
       title: "Action",
       key: "action",
-      hidden: orderModel && orderModel.status !== 1,
+      hidden: orderModel && !statusUpdate.includes(orderModel.status),
       render: (_, record, index) => (
         <Space style={{ textAlign: "center" }}>
           <Trash2
@@ -634,6 +650,16 @@ const OrderDetail = () => {
         </p>
       ),
     },
+    {
+      title: "Loại thanh toán",
+      dataIndex: "id",
+      key: "id",
+      render: (_, record, index) => (
+        <p style={{ fontSize: "13px", color: "black", fontWeight: "300" }}>
+          {payment?.name}
+        </p>
+      ),
+    },
   ];
   function formatCurrencyVND(amount) {
     return new Intl.NumberFormat("vi-VN", {
@@ -641,6 +667,17 @@ const OrderDetail = () => {
       currency: "VND",
     }).format(amount);
   }
+  const fetchProvince = async () => {
+    var request = {
+      name: null,
+    };
+    const { success, data } = await getProvince(request);
+    if (!success || data.status == "Error") {
+      toast.error(data.message);
+    } else {
+      setProvince(data.data);
+    }
+  };
   const fetchDistrict = async (provinceId) => {
     setDistrictId(0);
     var request = {
@@ -669,18 +706,73 @@ const OrderDetail = () => {
     }
   };
 
+  const handleSelectProvince = async (e, index) => {
+    fetchDistrict(e);
+    // const fee = await fetchShippingFee(e);
+    setListAddress(
+      address.map((item, i) =>
+        i === index ? { ...item, provinceId: e } : item
+      )
+    );
+  };
+  const handleSelectDistrict = async (e, index) => {
+    fetchWard(e);
+    setListAddress(
+      address.map((item, i) =>
+        i === index ? { ...item, districtId: e } : item
+      )
+    );
+  };
+  const handleSelectWard = async (e, index) => {
+    setListAddress(
+      address.map((item, i) => (i === index ? { ...item, wardId: e } : item))
+    );
+  };
+
+  const handlePopupUpdateCustomer = ({
+    fullName,
+    phoneNumber,
+    email,
+    provinceId,
+    districtId,
+    wardId,
+    address,
+  }) => {
+    setOrderModel({
+      ...orderModel,
+      userModel: { ...orderModel.userModel, fullName, phoneNumber, email },
+      addressModel: {
+        ...orderModel.addressModel,
+        provinceId,
+        districtId,
+        wardId,
+        addressDetail: address,
+      },
+    });
+  };
+
   const [isModalAccept, setIsModalAccept] = useState(false);
+  const [isModalAcceptDelivery, setIsModalAcceptDelivery] = useState(false);
   const [isModalDelivery, setIsModalDelivery] = useState(false);
   const [isModalFinish, setIsModalFinish] = useState(false);
   const [isModalReject, setIsModalReject] = useState(false);
 
   const handleOkAccept = () => {
-    updateStatus(orderModel.id, ORDER_STATUS.ORDER_STATUS_DELIVERY, "");
+    updateStatus(orderModel.id, ORDER_STATUS.ORDER_STATUS_ACCEPT, "");
     setIsModalAccept(false);
+  };
+
+  const handleOkAcceptDelivery = () => {
+    updateStatus(orderModel.id, ORDER_STATUS.ORDER_STATUS_DELIVERY, "");
+    setIsModalAcceptDelivery(false);
   };
 
   const handleCancelAccept = (e) => {
     setIsModalAccept(false);
+  };
+
+  const handleCancelAcceptDelivery = (e) => {
+    setIsModalAcceptDelivery(false);
   };
 
   const handleRejectAccept = (e) => {
@@ -698,6 +790,10 @@ const OrderDetail = () => {
 
   const showAcceptModel = () => {
     setIsModalAccept(true);
+  };
+
+  const showAcceptDeliveryModel = () => {
+    setIsModalAcceptDelivery(true);
   };
 
   const showDeliveryModel = () => {
@@ -739,9 +835,17 @@ const OrderDetail = () => {
       <CustomPopup
         visible={isModalAccept}
         title="Xác nhận"
-        content={<p>Xác nhận đơn hàng và giao cho đơn vị vận chuyển?</p>} // You can replace this with any content
+        content={<p>Xác nhận đơn hàng?</p>} // You can replace this with any content
         onClose={handleCancelAccept}
         onOk={handleOkAccept}
+        showReject={true}
+      />
+      <CustomPopup
+        visible={isModalAcceptDelivery}
+        title="Xác nhận"
+        content={<p>Xác nhận đơn hàng và giao cho đơn vị vận chuyển?</p>} // You can replace this with any content
+        onClose={handleCancelAcceptDelivery}
+        onOk={handleOkAcceptDelivery}
         showReject={true}
       />
       <CustomPopup
@@ -831,7 +935,7 @@ const OrderDetail = () => {
                   orderModel.status === ORDER_STATUS.ORDER_STATUS_ACCEPT && (
                     <Button
                       style={{ background: "#1fbf39", color: "white" }}
-                      onClick={() => showAcceptModel()}
+                      onClick={() => showAcceptDeliveryModel()}
                     >
                       Xác nhận
                     </Button>
@@ -910,16 +1014,25 @@ const OrderDetail = () => {
                     <Col span={24}>
                       <Row gutter={[16, 16]} justify={"space-between"}>
                         <Col span={24}>
-                          <span
-                            className="hide-menu"
-                            style={{
-                              fontSize: "13px",
-                              color: "black",
-                              fontWeight: "bold",
-                            }}
-                          >
-                            Thông tin khách hàng
-                          </span>
+                          <div className="d-flex justify-content-between">
+                            <span
+                              className="hide-menu"
+                              style={{
+                                fontSize: "13px",
+                                color: "black",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              Thông tin khách hàng
+                            </span>
+                            {statusUpdate.includes(orderModel?.status) && (
+                              <CustomerUpdatePopup
+                                user={orderModel?.userModel}
+                                addressModel={orderModel?.addressModel}
+                                handlePopupSelected={handlePopupUpdateCustomer}
+                              />
+                            )}
+                          </div>
                         </Col>
                         <Divider orientation="left" plain />
                         <br />
@@ -964,6 +1077,7 @@ const OrderDetail = () => {
                               </p>
                             </Col>
                           </Row>
+
                           <Row>
                             <Col span={5}>
                               <p style={{ fontWeight: "bold" }}>Địa chỉ: </p>
@@ -972,7 +1086,7 @@ const OrderDetail = () => {
                               <p style={{ fontWeight: "500" }}>
                                 {orderModel &&
                                   orderModel.addressModel &&
-                                  orderModel.addressModel.fullInfo}
+                                  orderModel.addressModel?.fullInfo}
                               </p>
                             </Col>
                           </Row>
@@ -1033,16 +1147,6 @@ const OrderDetail = () => {
                         Lịch sử thanh toán
                       </span>
                     </Col>
-
-                    {orderModel && orderModel.status === 1 && (
-                      <Col span={12} style={{ textAlign: "right" }}>
-                        <ProductPopUp
-                          handleProductSelected={handleProductSelected}
-                          modelProduct={tab.products}
-                          tabIndex={index}
-                        />
-                      </Col>
-                    )}
                   </Row>
                   <Divider orientation="left" plain />
                   <Table
@@ -1069,7 +1173,7 @@ const OrderDetail = () => {
                       </span>
                     </Col>
 
-                    {orderModel && orderModel.status === 1 && (
+                    {orderModel && statusUpdate.includes(orderModel.status) && (
                       <Col span={12} style={{ textAlign: "right" }}>
                         <ProductPopUp
                           handleProductSelected={handleProductSelected}
@@ -1095,20 +1199,24 @@ const OrderDetail = () => {
         <Card>
           <Row>
             <Col span={12}>
-              <span
-                className="hide-menu"
-                style={{
-                  fontSize: "13px",
-                  color: "black",
-                  fontWeight: "bold",
-                }}
-              >
-                Phiếu giảm giá
-              </span>
+              {orderModel && orderModel.couponModel && (
+                <>
+                  <span
+                    className="hide-menu"
+                    style={{
+                      fontSize: "13px",
+                      color: "black",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Phiếu giảm giá
+                  </span>
 
-              <p style={{ fontWeight: "500", marginBottom: 0 }}>
-                {orderModel && orderModel.couponModel.code}
-              </p>
+                  <p style={{ fontWeight: "500", marginBottom: 0 }}>
+                    {orderModel && orderModel.couponModel?.code}
+                  </p>
+                </>
+              )}
             </Col>
             <Col span={12}>
               <Col span={24}>
@@ -1125,20 +1233,22 @@ const OrderDetail = () => {
                   </Col>
                 </Row>
               </Col>
-              <Col span={24}>
-                <Row align={"middle"} gutter={[16, 16]}>
-                  <Col span={6}>
-                    <p style={{ fontWeight: "500", marginBottom: 0 }}>
-                      Giảm giá:
-                    </p>
-                  </Col>
-                  <Col span={18} style={{ textAlign: "right" }}>
-                    <p style={{ fontWeight: "700", marginBottom: 0 }}>
-                      {formatCurrencyVND(discount)}
-                    </p>
-                  </Col>
-                </Row>
-              </Col>
+              {orderModel && orderModel.couponModel && (
+                <Col span={24}>
+                  <Row align={"middle"} gutter={[16, 16]}>
+                    <Col span={6}>
+                      <p style={{ fontWeight: "500", marginBottom: 0 }}>
+                        Giảm giá:
+                      </p>
+                    </Col>
+                    <Col span={18} style={{ textAlign: "right" }}>
+                      <p style={{ fontWeight: "700", marginBottom: 0 }}>
+                        {formatCurrencyVND(discount)}
+                      </p>
+                    </Col>
+                  </Row>
+                </Col>
+              )}
               {orderModel && orderModel.isDeliver === DELIVERY_STATUS.YES && (
                 <Col span={24}>
                   <Row align={"middle"} gutter={[16, 16]}>
@@ -1185,6 +1295,18 @@ const OrderDetail = () => {
                   </Col>
                 </Row>
               </Col>
+              {orderModel && statusUpdate.includes(orderModel.status) && (
+                <Col span={24} style={{ textAlign: "right" }}>
+                  <Button
+                    type="primary"
+                    onClick={() => {
+                      onCreateOrder();
+                    }}
+                  >
+                    Cập nhật đơn hàng
+                  </Button>
+                </Col>
+              )}
             </Col>
           </Row>
         </Card>

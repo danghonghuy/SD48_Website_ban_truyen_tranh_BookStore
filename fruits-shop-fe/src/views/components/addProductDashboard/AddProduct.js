@@ -174,7 +174,7 @@ const AddProduct = () => {
               <Form.Item
                 label="Mã sản phẩm"
                 name="code"
-                rules={[{ required: true, message: "Please input product code!" }]}
+                rules={[{ required: true, message: "Vui lòng nhập mã sản phẩm!" }]}
               >
                 <Input placeholder="Mã sản phẩm" />
               </Form.Item>
@@ -183,7 +183,7 @@ const AddProduct = () => {
               <Form.Item
                 label="Loại sản phẩm"
                 name="categoryId"
-                rules={[{ required: true, message: "Please input category type!" }]}
+                rules={[{ required: true, message: "Vui lòng chọn thể loại sản phẩm!" }]}
               >
                 <Select
                   placeholder="Please select"
@@ -198,9 +198,9 @@ const AddProduct = () => {
 
             <Col span={8}>
               <Form.Item
-                label="Kiểu sản phẩm"
+                label="Gói bán"
                 name="typeId"
-                rules={[{ required: true, message: "Please input product type" }]}
+                rules={[{ required: true, message: "Vui lòng chọn gói bán!" }]}
               >
                 <Select
                   placeholder="Please select"
@@ -217,7 +217,7 @@ const AddProduct = () => {
               <Form.Item
                 label="Giá sản phẩm"
                 name="price"
-                rules={[{ required: true, message: "Please input product price!" }]}
+                rules={[{ required: true, message: "Vui lòng nhập giá sản phẩm!" }]}
               >
                 <Input placeholder="Price" type="number" />
               </Form.Item>
@@ -228,7 +228,7 @@ const AddProduct = () => {
                 label="Số lượng"
                 name="stock"
                 rules={[
-                  { required: true, message: "Please input product quantity!" },
+                  { required: true, message: "Vui lòng nhập số lượng sản phẩm!" },
                 ]}
               >
                 <Input placeholder="Quantity" type="number" />
@@ -240,7 +240,7 @@ const AddProduct = () => {
                 label="Mô tả"
                 name="description"
                 rules={[
-                  { required: false, message: "Please input product description!" },
+                  { required: false, message: "Vui lòng nhập mô tả sản phẩm!" },
                 ]}
               >
                 <Input.TextArea placeholder="Description" rows={5}/>

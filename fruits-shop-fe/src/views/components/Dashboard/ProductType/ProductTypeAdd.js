@@ -58,7 +58,8 @@ const ProductTypeAdd = ({ fetchData, modelItem, textButton, isStyle }) => {
 
   return (
     <>
-      <div>
+      {" "}
+      <div style={{ display: "inline-block" }}>
         <Button
           type={isStyle ? "primary" : "button"}
           value="small"
@@ -76,7 +77,7 @@ const ProductTypeAdd = ({ fetchData, modelItem, textButton, isStyle }) => {
         </Button>
 
         <Modal
-          title={isStyle ? "Thêm mới kiểu sản phẩm" : "Cập nhật thông tin"}
+          title={isStyle ? "Thêm mới gói bán" : "Cập nhật thông tin"}
           centered
           visible={modal2Open}
           onCancel={() => setModal2Open(false)}
@@ -109,13 +110,13 @@ const ProductTypeAdd = ({ fetchData, modelItem, textButton, isStyle }) => {
             <Row gutter={[16, 16]}>
               <Col span={24}>
                 <Form.Item
-                  label="Kiểu sản phẩm"
+                  label="Tên gói bán"
                   name="name"
                   rules={[
-                    { required: true, message: "Please input type name!" },
+                    { required: true, message: "Vui lòng nhập tên gói bán!" },
                   ]}
                 >
-                  <Input placeholder="Please input type name" />
+                  <Input placeholder="Nhập tên gói bán" />
                 </Form.Item>
               </Col>
             </Row>
@@ -128,11 +129,11 @@ const ProductTypeAdd = ({ fetchData, modelItem, textButton, isStyle }) => {
                   rules={[
                     {
                       required: true,
-                      message: "Please input type description!",
+                      message: "Vui lòng nhập mô tả!",
                     },
                   ]}
                 >
-                  <Input placeholder="Please input type description" />
+                  <Input placeholder="Nhập mô tả" />
                 </Form.Item>
               </Col>
             </Row>

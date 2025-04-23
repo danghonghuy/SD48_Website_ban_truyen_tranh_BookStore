@@ -1,8 +1,11 @@
 package com.example.backend_comic_service.develop.controller;
 
+import com.example.backend_comic_service.develop.exception.ResponseFactory;
 import com.example.backend_comic_service.develop.model.base_response.BaseListResponseModel;
 import com.example.backend_comic_service.develop.model.base_response.BaseResponseModel;
+import com.example.backend_comic_service.develop.model.excel.ExcelData;
 import com.example.backend_comic_service.develop.model.model.ProductModel;
+import com.example.backend_comic_service.develop.model.request.product.ProductRequest;
 import com.example.backend_comic_service.develop.service.IProductService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -11,11 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.sql.Date;
 import java.util.List;
 
 @RestController
@@ -23,15 +27,18 @@ import java.util.List;
 public class ProductController {
     @Autowired
     private IProductService productService;
+    @Autowired
+    private ResponseFactory responseFactory;
+    @Autowired
+    ObjectMapper objectMapper;
 
     @PostMapping(value = "/add-or-change", produces = "application/json;charset=UTF-8",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public BaseResponseModel<ProductModel> addOrChange(@RequestPart("productModel") String productModel, @RequestPart("files") List<MultipartFile> files) {
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             byte[] bytes = productModel.getBytes(StandardCharsets.ISO_8859_1);
             String utf8String = new String(bytes, StandardCharsets.UTF_8);
-            ProductModel model = objectMapper.readValue(utf8String, ProductModel.class);
+            ProductRequest model = objectMapper.readValue(utf8String, ProductRequest.class);
             return productService.addOrChangeProduct(model, files);
         } catch (JsonProcessingException e) {
             return null;
@@ -65,4 +72,9 @@ public class ProductController {
         return productService.generateCode();
     }
 
+    @PostMapping("/upload")
+    public ResponseEntity<List<ExcelData>> uploadExcel(@RequestParam("file") MultipartFile file) throws IOException {
+        productService.readExcelWithImages(file);
+        return responseFactory.success(null);
+    }
 }

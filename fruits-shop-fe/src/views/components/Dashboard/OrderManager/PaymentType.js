@@ -16,12 +16,29 @@ const PaymentType = ({
   paymentId,
   products,
   tabIds,
+  phoneNumber,
+  email,
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [number, setNumber] = useState(0);
 
   // Function to show the modal
   const showModal = () => {
+    if (phoneNumber && phoneNumber.match(/^[0-9]{10}$/) === null) {
+      toast.error("Số điện thoại không hợp lệ");
+      return;
+    }
+    if (
+      email &&
+      email.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/) === null
+    ) {
+      toast.error("Email không hợp lệ");
+      return;
+    }
+    if (!paymentId) {
+      toast.error("Vui lòng chọn phương thức thanh toán");
+      return;
+    }
     setIsModalVisible(true);
   };
 

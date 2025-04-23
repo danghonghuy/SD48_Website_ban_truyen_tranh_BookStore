@@ -5,7 +5,7 @@ import Link from "antd/es/typography/Link";
 const Checkout = () => {
   return (
     <>
-      <div class="container-fluid page-header py-5">
+      <div class="container-fluid page-header no-margin py-5">
         <Link to={"/checkout"}>
           <h1 class="text-center text-white display-6">Checkout</h1>
         </Link>

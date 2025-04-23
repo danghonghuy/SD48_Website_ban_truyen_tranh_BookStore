@@ -8,6 +8,12 @@ import useType from "@api/useType";
 import useProduct from "@api/useProduct";
 import { toast } from "react-toastify";
 import { format } from "date-fns";
+import { getMediaUrl } from "@constants/commonFunctions";
+import dayjs from "dayjs";
+import { InputNumber } from "antd";
+import { PlusIcon } from "lucide-react";
+import AddBranch from "../BranchManager/AddBranch";
+import ProductTypeAdd from "../ProductType/ProductTypeAdd";
 
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -93,11 +99,13 @@ const AddProduct = ({ fetchData, modelItem, textButton, isStyle }) => {
           series: data.data.series,
           authorPublic: data.data.authorPublish,
           author: data.data.author,
+          datePublish: data.data.datePublish
+            ? dayjs(data.data.datePublish)
+            : undefined,
+          datePublic: dayjs(data.data.datePublic),
         });
-        setDatePublish(
-          data.data.datePublish && new Date(data.data.datePublish)
-        );
-        setDatePublic(data.data.datePublic && new Date(data.data.datePublic));
+        setDatePublish(data.data.datePublish);
+        setDatePublic(data.data.datePublic);
         if (data.data.images && data.data.images.length > 0) {
           data.data.images.map((item) => {
             return handleConvert(item);
@@ -128,7 +136,7 @@ const AddProduct = ({ fetchData, modelItem, textButton, isStyle }) => {
           uid: "-1", // Required: unique id for each file
           name: fileName,
           status: "done",
-          url: URL.createObjectURL(file), // You can also use the object URL
+          url: url.imageUrl, // You can also use the object URL
           originFileObj: file, // Store the file object itself
         },
       ]);
@@ -194,12 +202,12 @@ const AddProduct = ({ fetchData, modelItem, textButton, isStyle }) => {
         stock: values.stock,
         description: values.description,
         code: values.code,
-        datePublic: datePublic,
+        datePublic: values.datePublic,
         authorPublish: values.authorPublic,
         publisher: values.authorPublish,
         author: values.author,
         series: values.series,
-        datePublish: datePublish,
+        datePublish: values.datePublish,
         id: modelItem && modelItem.id,
         status: 1,
       };
@@ -212,7 +220,7 @@ const AddProduct = ({ fetchData, modelItem, textButton, isStyle }) => {
       const { success, data } = await addOrChange(formData, {
         "Content-Type": "multipart/form-data;",
       });
-      if (data.status != "Error" && success) {
+      if (data.success) {
         setModal2Open(false);
         toast.success(data.message);
         fetchData();
@@ -231,11 +239,21 @@ const AddProduct = ({ fetchData, modelItem, textButton, isStyle }) => {
     console.log(`Selected: ${value}`);
   };
   const handleSetDatePublish = (date) => {
-    setDatePublish(date.format());
+    setDatePublish(dayjs(date));
   };
   const handleSetDatePublic = (date) => {
-    setDatePublic(date.format());
+    setDatePublic(dayjs(date));
   };
+
+  const checkDatePublic = (_, value) => {
+    if (datePublish && dayjs(datePublic).isBefore(dayjs(datePublish))) {
+      return Promise.reject(
+        new Error("Ngày phát hành phải sau ngày xuất bản!")
+      );
+    }
+    return Promise.resolve();
+  };
+
   return (
     <div>
       <Button
@@ -276,7 +294,7 @@ const AddProduct = ({ fetchData, modelItem, textButton, isStyle }) => {
                 label="Mã sản phẩm"
                 name="code"
                 rules={[
-                  { required: true, message: "Please input product code!" },
+                  { required: true, message: "Vui lòng nhập mã sản phẩm!" },
                 ]}
               >
                 <Input placeholder="" readOnly={true} />
@@ -288,7 +306,7 @@ const AddProduct = ({ fetchData, modelItem, textButton, isStyle }) => {
                 label="Tên truyện"
                 name="name"
                 rules={[
-                  { required: true, message: "Please input product name!" },
+                  { required: true, message: "Vui lòng nhập tên truyện!" },
                 ]}
               >
                 <Input placeholder="" />
@@ -296,39 +314,69 @@ const AddProduct = ({ fetchData, modelItem, textButton, isStyle }) => {
             </Col>
 
             <Col span={12}>
-              <Form.Item
-                label="Danh mục"
-                name="categoryId"
-                rules={[{ required: true, message: "Please input category!" }]}
-              >
-                <Select
-                  placeholder=""
-                  onChange={handleChange}
-                  style={{
-                    width: "100%",
-                    height: "40px",
-                  }}
-                  options={category}
-                />
-              </Form.Item>
+              <Row gutter={[5, 5]}>
+                <Col span={21}>
+                  <Form.Item
+                    label="Thể loại"
+                    name="categoryId"
+                    rules={[
+                      { required: true, message: "Please input category!" },
+                    ]}
+                  >
+                    <Select
+                      placeholder=""
+                      onChange={handleChange}
+                      style={{
+                        width: "100%",
+                        height: "40px",
+                      }}
+                      options={category}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col span={3}>
+                  <div style={{ marginTop: "30px" }}>
+                    <AddBranch
+                      fechtList={fetchCategory}
+                      modelItem={null}
+                      textButton={"+"}
+                    />
+                  </div>
+                </Col>
+              </Row>
             </Col>
 
             <Col span={12}>
-              <Form.Item
-                label="Loại sách"
-                name="typeId"
-                rules={[{ required: true, message: "Please input Origin" }]}
-              >
-                <Select
-                  placeholder=""
-                  onChange={handleChange}
-                  style={{
-                    width: "100%",
-                    height: "40px",
-                  }}
-                  options={types}
-                />
-              </Form.Item>
+              <Row gutter={[5, 5]}>
+                <Col span={21}>
+                  <Form.Item
+                    label="Gói bán"
+                    name="typeId"
+                    rules={[{ required: true, message: "Please input Origin" }]}
+                  >
+                    <Select
+                      placeholder=""
+                      onChange={handleChange}
+                      style={{
+                        width: "100%",
+                        height: "40px",
+                      }}
+                      options={types}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col span={3}>
+                  <div style={{ marginTop: "30px" }}>
+                    <ProductTypeAdd
+                      isOpen={true}
+                      fetchData={fetchTypes}
+                      modelItem={null}
+                      textButton={"+"}
+                      isStyle={true}
+                    />
+                  </div>
+                </Col>
+              </Row>
             </Col>
 
             <Col span={12}>
@@ -336,7 +384,7 @@ const AddProduct = ({ fetchData, modelItem, textButton, isStyle }) => {
                 label="Tác giả"
                 name="author"
                 rules={[
-                  { required: true, message: "Please input product price!" },
+                  { required: true, message: "Vui lòng nhập tên tác giả!" },
                 ]}
               >
                 <Input placeholder="" type="text" />
@@ -348,7 +396,7 @@ const AddProduct = ({ fetchData, modelItem, textButton, isStyle }) => {
                 label="Nhà xuất bản"
                 name="authorPublish"
                 rules={[
-                  { required: true, message: "Please input product quantity!" },
+                  { required: true, message: "Vui lòng nhập nhà xuất bản!" },
                 ]}
               >
                 <Input placeholder="" type="text" />
@@ -359,9 +407,7 @@ const AddProduct = ({ fetchData, modelItem, textButton, isStyle }) => {
               <Form.Item
                 label="Series"
                 name="series"
-                rules={[
-                  { required: true, message: "Please input product price!" },
-                ]}
+                rules={[{ required: true, message: "Vui lòng nhập series!" }]}
               >
                 <Input placeholder="" type="text" />
               </Form.Item>
@@ -372,7 +418,7 @@ const AddProduct = ({ fetchData, modelItem, textButton, isStyle }) => {
                 label="Nhà phát hành"
                 name="authorPublic"
                 rules={[
-                  { required: true, message: "Please input product quantity!" },
+                  { required: true, message: "Vui lòng nhập nhà phát hành!" },
                 ]}
               >
                 <Input placeholder="" type="text" />
@@ -380,11 +426,18 @@ const AddProduct = ({ fetchData, modelItem, textButton, isStyle }) => {
             </Col>
 
             <Col span={12}>
-              <Form.Item label="Ngày xuất bản" name="datePublish">
+              <Form.Item
+                label="Ngày xuất bản"
+                name="datePublish"
+                rules={[
+                  { required: true, message: "Please input date publish!" },
+                ]}
+              >
                 <DatePicker
                   onChange={handleSetDatePublish}
-                  placeholder={datePublish && format(datePublish, "dd-MM-yyyy")}
+                  placeholder={datePublish}
                   style={{ width: "100%", height: "40px" }}
+                  format="DD/MM/YYYY"
                 />
               </Form.Item>
             </Col>
@@ -394,13 +447,15 @@ const AddProduct = ({ fetchData, modelItem, textButton, isStyle }) => {
                 label="Ngày phát hành"
                 name="datePublic"
                 rules={[
-                  { required: true, message: "Please input product quantity!" },
+                  { required: true, message: "Vui lòng chọn ngày phát hành!" },
+                  { validator: checkDatePublic },
                 ]}
               >
                 <DatePicker
                   onChange={handleSetDatePublic}
-                  placeholder={datePublic && format(datePublic, "dd-MM-yyyy")}
+                  placeholder={datePublic}
                   style={{ width: "100%", height: "40px" }}
+                  format="DD/MM/YYYY"
                 />
               </Form.Item>
             </Col>
@@ -410,10 +465,15 @@ const AddProduct = ({ fetchData, modelItem, textButton, isStyle }) => {
                 label="Giá sản phẩm"
                 name="price"
                 rules={[
-                  { required: true, message: "Please input product price!" },
+                  { required: true, message: "Vui lòng nhập giá truyện!" },
                 ]}
               >
-                <Input placeholder="Price" type="text" />
+                <InputNumber
+                  placeholder="Price"
+                  type="text"
+                  min={0}
+                  style={{ width: "100%", height: "40px" }}
+                />
               </Form.Item>
             </Col>
 
@@ -421,11 +481,14 @@ const AddProduct = ({ fetchData, modelItem, textButton, isStyle }) => {
               <Form.Item
                 label="Số lượng"
                 name="stock"
-                rules={[
-                  { required: true, message: "Please input product quantity!" },
-                ]}
+                rules={[{ required: true, message: "Vui lòng nhập số lượng!" }]}
               >
-                <Input placeholder="Quantity" type="text" />
+                <InputNumber
+                  placeholder="Quantity"
+                  type="text"
+                  min={0}
+                  style={{ width: "100%", height: "40px" }}
+                />
               </Form.Item>
             </Col>
 
@@ -436,7 +499,7 @@ const AddProduct = ({ fetchData, modelItem, textButton, isStyle }) => {
                 rules={[
                   {
                     required: false,
-                    message: "Please input product description!",
+                    message: "Vui lòng nhập mô tả sản phẩm!",
                   },
                 ]}
               >
@@ -451,9 +514,8 @@ const AddProduct = ({ fetchData, modelItem, textButton, isStyle }) => {
                 getValueFromEvent={(e) => {
                   if (Array.isArray(e)) {
                     var elist = [];
-                    console.log(e.fileList);
                     e.fileList.forEach((element) => {
-                      elist.push(element.originFileObj);
+                      elist.push(element);
                     });
                   }
                   return elist;

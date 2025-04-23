@@ -2,7 +2,7 @@ package com.example.backend_comic_service.develop.model.request.shipping_fee;
 
 
 import com.example.backend_comic_service.develop.entity.ShippingFee;
-import com.example.backend_comic_service.develop.entity.StatusFeeEnum;
+import com.example.backend_comic_service.develop.enums.StatusFeeEnum;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;

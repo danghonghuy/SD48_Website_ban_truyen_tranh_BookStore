@@ -1,6 +1,8 @@
 package com.example.backend_comic_service.develop.repository;
 
 import com.example.backend_comic_service.develop.entity.OrderEntity;
+import com.example.backend_comic_service.develop.enums.OrderStatusEnum;
+import com.example.backend_comic_service.develop.model.dto.StatisticalOrdersDTO;
 import com.example.backend_comic_service.develop.model.mapper.OrderGetListMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
@@ -10,7 +12,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -20,7 +22,7 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Integer> {
     @Modifying
     @Transactional
     @Query(value = "update orders set [status] = ?1 where id = ?2", nativeQuery = true)
-    void updateOrderStatus(Integer status, Integer orderId);
+    void updateOrderStatus(OrderStatusEnum status, Integer orderId);
     @Query(value = "    select\n" +
             "        od.id as orderId,\n" +
             "        od.code as orderCode,\n" +
@@ -72,5 +74,32 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Integer> {
             "  and od.[type] = isnull(?6, od.[type])\n" +
             "  and od.total_price between isnull(?7, od.total_price) and isnull(?8, od.total_price)\n" +
             "  and od.order_date between isnull(?9, od.order_date) and isnull(?10, od.order_date)", nativeQuery = true)
-    Page<OrderGetListMapper> getListOrder(Integer userId, Integer paymentId, Integer employeeId, Integer status, Integer stage, Integer type, Integer startPrice, Integer endPrice, Date startDate, Date endDate, Pageable pageable);
+    Page<OrderGetListMapper> getListOrder(Integer userId, Integer paymentId, Integer employeeId, Integer status, Integer stage, Integer type, Integer startPrice, Integer endPrice, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+
+
+    @Query(value = "SELECT o.status as status, count(o.id) as totalCount \n" +
+            "FROM orders o\n" +
+            "WHERE o.created_date >= DATEADD(DAY, -DATEPART(WEEKDAY, GETDATE()) + 1, GETDATE())\n" +
+            "  AND o.created_date < DATEADD(DAY, 7 - DATEPART(WEEKDAY, GETDATE()) + 1, GETDATE())\n" +
+            "group by status", nativeQuery = true)
+    List<StatisticalOrdersDTO> getStatisticalWeek();
+
+    @Query(value = "SELECT status as status, count(id) as totalCount \n" +
+            "FROM orders \n" +
+            "WHERE CAST(created_date AS DATE) = CAST(GETDATE() AS DATE) " +
+            "group by status", nativeQuery = true)
+    List<StatisticalOrdersDTO> getStatisticalToday();
+
+    @Query(value = "SELECT status as status, count(id) as totalCount \n" +
+            "FROM orders \n" +
+            "WHERE YEAR(created_date) = YEAR(GETDATE())\n" +
+            "  AND MONTH(created_date) = MONTH(GETDATE()) " +
+            "group by status", nativeQuery = true)
+    List<StatisticalOrdersDTO> getStatisticalMonth();
+
+    @Query(value = "SELECT status as status, count(id) as totalCount \n" +
+            "FROM orders \n" +
+            "WHERE YEAR(created_date) = YEAR(GETDATE())\n" +
+            "group by status", nativeQuery = true)
+    List<StatisticalOrdersDTO> getStatisticalYear();
 }

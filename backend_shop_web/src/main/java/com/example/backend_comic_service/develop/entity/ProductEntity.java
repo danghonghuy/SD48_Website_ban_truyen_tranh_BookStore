@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @AllArgsConstructor
@@ -28,7 +30,7 @@ public class ProductEntity {
     @Column(name = "description")
     private String description;
     @Column(name = "date_publish")
-    private Date datePublish;
+    private LocalDate datePublish;
     @Column(name = "price")
     private float price;
     @Column(name = "price_discount")
@@ -38,11 +40,11 @@ public class ProductEntity {
     @Column(name = "format")
     private Integer format;
     @Column(name = "created_date")
-    private Date createdDate;
+    private LocalDateTime createdDate;
     @Column(name = "created_by")
     private Integer createdBy;
     @Column(name = "updated_date")
-    private Date updatedDate;
+    private LocalDateTime updatedDate;
     @Column(name = "updated_by")
     private Integer updatedBy;
     @Column(name = "is_deleted")
@@ -66,7 +68,7 @@ public class ProductEntity {
     @Column(name = "publisher")
     private String publisher;
     @Column(name = "date_public")
-    private Date datePublic;
+    private LocalDate datePublic;
     @Column(name = "status")
     private Integer status;
 
@@ -90,7 +92,7 @@ public class ProductEntity {
         productModel.setTypeId(typeEntity.getId());
         productModel.setCategoryName(categoryEntity.getName());
         productModel.setTypeName(typeEntity.getName());
-        productModel.setImages(imageEntities.isEmpty() ? null : imageEntities.stream().map(ImageEntity::getImageUrl).toList());
+        productModel.setImages(imageEntities == null ? null : imageEntities.stream().map(ImageEntity::getImageUrl).toList());
         productModel.setCatalog(catalog);
         productModel.setAuthor(author);
         productModel.setPublisher(publisher);

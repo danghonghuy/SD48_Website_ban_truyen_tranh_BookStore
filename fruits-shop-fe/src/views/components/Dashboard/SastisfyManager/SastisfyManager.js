@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   Card,
@@ -12,6 +12,7 @@ import {
   Button,
   Timeline,
   Radio,
+  Select,
 } from "antd";
 import {
   ToTopOutlined,
@@ -36,11 +37,53 @@ import "./assets/styles/main.css";
 import "./assets/styles/responsive.css";
 import Echart from "./components/chart/EChart";
 import LineChart from "./components/chart/LineChart";
+import useDashboard from "@api/useDashboard";
+import { formatCurrencyVND } from "@constants/commonFunctions";
+import ReactApexChart from "react-apexcharts";
 
+const filters = [{
+  label: 'Hôm nay',
+  value: 'TODAY'
+},
+{
+  label: 'Tuần',
+  value: 'WEEK'
+},
+{
+  label: 'Tháng',
+  value: 'MONTH'
+},
+{
+  label: 'Năm',
+  value: 'YEAR'
+},]
+const options = {
+  chart: {
+    width: 380,
+    type: 'pie',
+  },
+  labels: ['Thành công', 'Hủy đơn', 'Chờ xác nhận', 'Xác nhận đơn', 'Chờ vận chuyển', "Giao hàng thành công"],
+  responsive: [{
+    breakpoint: 480,
+    options: {
+      chart: {
+        width: 200
+      },
+      legend: {
+        position: 'bottom'
+      }
+    }
+  }]
+}
 export default function SastisfyManager() {
 
   const { Title, Text } = Typography;
   const [reverse, setReverse] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState(filters?.[0].value)
+  const [dataDashboard, setDataDashboard] = useState()
+  const [dataDashboardPie, setDataDashboardPie] = useState([11, 12, 13, 14, 15, 16])
+
+  const { getStatistical } = useDashboard()
 
   const dollor = [
     <svg
@@ -130,32 +173,33 @@ export default function SastisfyManager() {
   ];
   const count = [
     {
-      today: "Today’s Sales",
+      today: "Tổng tiền hàng",
       title: "$53,000",
       persent: "+30%",
       icon: dollor,
       bnb: "bnb2",
     },
     {
-      today: "Today’s Users",
+      today: "Tổng số lượng sản phẩm",
       title: "3,200",
       persent: "+20%",
-      icon: profile,
+      icon: cart,
       bnb: "bnb2",
     },
     {
-      today: "New Clients",
+      today: "Đơn hàng thành công",
       title: "+1,200",
       persent: "-20%",
       icon: heart,
       bnb: "redtext",
     },
     {
-      today: "New Orders",
+      today: "Đơn hàng bị hủy",
       title: "$13,200",
       persent: "10%",
-      icon: cart,
+
       bnb: "bnb2",
+      icon: profile,
     },
   ];
 
@@ -312,7 +356,10 @@ export default function SastisfyManager() {
   ];
 
 
-  const onChange = (e) => console.log(`radio checked:${e.target.value}`);
+
+  const onChange = async (value) => {
+    setSelectedFilter(value)
+  };
 
   const uploadProps = {
     name: "file",
@@ -332,10 +379,28 @@ export default function SastisfyManager() {
     },
   };
 
+  useEffect(() => {
+    getStatistical(selectedFilter).then((data) => {
+      if (data.success) {
+        setDataDashboard(data.data)
+        // console.log(data.data)
+        setDataDashboardPie([data.data?.totalSuccess, data.data?.totalCancel, data.data?.totalWaiting, data.data?.totalAccept, data.data?.totalDelivery, data.data?.totalFinishDelivery])
+      }
+    })
+  }, [selectedFilter])
+
   return (
     <>
       <div className="layout-content">
-
+        <Select
+          placeholder="Please select"
+          style={{
+            width: '200px'
+          }}
+          onChange={onChange}
+          options={filters}
+          value={selectedFilter}
+        />
         <Row className="rowgap-vbox" gutter={[24, 0]}>
           {count.map((c, index) => (
             <Col
@@ -353,7 +418,10 @@ export default function SastisfyManager() {
                     <Col xs={18}>
                       <span>{c.today}</span>
                       <Title level={3}>
-                        {c.title} <small className={c.bnb}>{c.persent}</small>
+                        {index === 0 && formatCurrencyVND(dataDashboard?.totalRevenue)}
+                        {index === 1 && dataDashboard?.totalQuantity}
+                        {index === 2 && dataDashboard?.totalSuccess}
+                        {index === 3 && dataDashboard?.totalFail}
                       </Title>
                     </Col>
                     <Col xs={6}>
@@ -366,7 +434,11 @@ export default function SastisfyManager() {
           ))}
         </Row>
 
-        <Row gutter={[24, 0]}>
+        <Row>
+          <ReactApexChart options={options} series={dataDashboardPie} type="pie" width={380} />
+        </Row>
+
+        {/* <Row gutter={[24, 0]}>
           <Col xs={24} sm={24} md={12} lg={12} xl={10} className="mb-24">
             <Card bordered={false} className="criclebox h-full">
               <Echart />
@@ -480,7 +552,7 @@ export default function SastisfyManager() {
               </div>
             </Card>
           </Col>
-        </Row>
+        </Row> */}
       </div>
     </>
   );

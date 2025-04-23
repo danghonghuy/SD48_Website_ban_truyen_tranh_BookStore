@@ -192,13 +192,13 @@ function EmployeeManager() {
         if (record.gender) {
           return (
             <p style={{ fontSize: "13px", color: "black", fontWeight: "300" }}>
-              Male
+              Nam
             </p>
           );
         } else {
           return (
             <p style={{ fontSize: "13px", color: "black", fontWeight: "300" }}>
-              Female
+              Nữ
             </p>
           );
         }

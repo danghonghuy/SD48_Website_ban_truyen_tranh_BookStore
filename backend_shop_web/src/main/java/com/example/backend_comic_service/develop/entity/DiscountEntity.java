@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @AllArgsConstructor
@@ -29,19 +30,19 @@ public class DiscountEntity {
     @Column(name = "money_discount")
     private Integer moneyDiscount;
     @Column(name = "start_date")
-    private Date startDate;
+    private LocalDateTime startDate;
     @Column(name = "end_date")
-    private Date endDate;
+    private LocalDateTime endDate;
     @Column(name = "status")
     private Integer status;
     @Column(name = "is_deleted")
     private Integer isDeleted;
     @Column(name = "created_date")
-    private Date createdDate;
+    private LocalDateTime createdDate;
     @Column(name = "created_by")
     private Integer createdBy;
     @Column(name = "updated_date")
-    private Date updatedDate;
+    private LocalDateTime updatedDate;
     @Column(name = "updated_by")
     private Integer updatedBy;
     @Column(name = "[percent]")

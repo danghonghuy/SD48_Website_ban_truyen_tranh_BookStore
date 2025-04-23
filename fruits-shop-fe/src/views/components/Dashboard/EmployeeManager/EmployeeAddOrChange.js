@@ -19,6 +19,7 @@ import { Option } from "antd/es/mentions";
 import TextArea from "antd/es/input/TextArea";
 import useRole from "@api/useRole";
 import { format } from "date-fns";
+import dayjs from "dayjs";
 
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -91,7 +92,7 @@ const EmployeeAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
       if (data.data.dateBirth) {
         setBirthDate(new Date(data.data.dateBirth));
       }
-      setGender(data.data.gender ? "male" : "female");
+      setGender(data.data.gender ? "Nam" : "Nữ");
       if (data.data.address) {
         setProvinceId(data.data.address[0].provinceId);
         fetchDistrict(data.data.address[0].provinceId);
@@ -202,6 +203,13 @@ const EmployeeAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
     setBirthDate(date.format());
   };
 
+  const checkBirthDate = (_, value) => {
+    if (value && dayjs().diff(value, "years") < 18) {
+      return Promise.reject("Bạn phải trên 18 tuổi");
+    }
+    return Promise.resolve();
+  };
+
   const onFinish = async (values) => {
     try {
       const addressModel = address.map((e) => {
@@ -225,7 +233,7 @@ const EmployeeAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
         email: values.email,
         dateBirth: birthDate,
         userName: values.userName,
-        gender: gender === "male" ? true : false,
+        gender: gender === "Nam" ? true : false,
         address: addressModel,
         roleId: values.roleId,
         description: values.description,
@@ -382,7 +390,7 @@ const EmployeeAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
                 class="hide-menu"
                 style={{ fontSize: "13px", color: "black", fontWeight: "bold" }}
               >
-                Thông tin khách hàng
+                Thông tin nhân viên
               </span>
             </Col>
           </Row>
@@ -434,9 +442,11 @@ const EmployeeAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
             </Col>
             <Col span={12}>
               <Form.Item
-                label="Mã người dùng"
+                label="Mã nhân viên"
                 name="code"
-                rules={[{ required: true, message: "" }]}
+                rules={[
+                  { required: true, message: "Vui lòng nhập mã nhân viên" },
+                ]}
               >
                 <Input placeholder="" type="text" readOnly={true} />
               </Form.Item>
@@ -444,7 +454,13 @@ const EmployeeAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
               <Form.Item
                 label="Email"
                 name="email"
-                rules={[{ required: true, message: "" }]}
+                rules={[
+                  { required: true, message: "Vui lòng nhập email" },
+                  {
+                    type: "email",
+                    message: "Vui lòng nhập đúng định dạng email",
+                  },
+                ]}
               >
                 <Input placeholder="" type="text" />
               </Form.Item>
@@ -454,9 +470,11 @@ const EmployeeAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
           <Row gutter={[16, 16]}>
             <Col span={12}>
               <Form.Item
-                label="Họ tên khách hàng"
+                label="Họ tên nhân viên"
                 name="fullName"
-                rules={[{ required: true, message: "" }]}
+                rules={[
+                  { required: true, message: "Vui lòng nhập họ tên nhân viên" },
+                ]}
               >
                 <Input placeholder="" type="text" />
               </Form.Item>
@@ -464,9 +482,19 @@ const EmployeeAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
 
             <Col span={12}>
               <Form.Item
-                label="Số điện thoại khách hàng"
+                label="Số điện thoại nhân viên"
                 name="phoneNumber"
-                rules={[{ required: true, message: "" }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng nhập số điện thoại nhân viên",
+                  },
+                  {
+                    type: "regexp",
+                    pattern: new RegExp(/\d+/g),
+                    message: "Vui lòng nhập đúng định dạng số điện thoại",
+                  },
+                ]}
               >
                 <Input placeholder="" type="text" />
               </Form.Item>
@@ -477,14 +505,18 @@ const EmployeeAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
               <Form.Item
                 label="Username"
                 name="userName"
-                rules={[{ required: true, message: "" }]}
+                rules={[{ required: true, message: "Vui lòng nhập username" }]}
               >
                 <Input placeholder="" type="text" />
               </Form.Item>
             </Col>
 
             <Col span={12}>
-              <Form.Item label="Ngày sinh">
+              <Form.Item
+                label="Ngày sinh"
+                name="birthDate"
+                rules={[{ validator: checkBirthDate }]}
+              >
                 <DatePicker
                   onChange={handleSetBirthDate}
                   placeholder={birthDate && format(birthDate, "dd-MM-yyyy")}
@@ -495,9 +527,9 @@ const EmployeeAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
           </Row>
           <Col span={24}>
             <Form.Item
-              label="Desciption"
+              label="Mô tả"
               name="description"
-              rules={[{ required: true, message: "" }]}
+              rules={[{ required: true, message: "Vui lòng nhập mô tả" }]}
             >
               <TextArea rows={3} placeholder="Enter description" type="text" />
             </Form.Item>
@@ -507,28 +539,28 @@ const EmployeeAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
               <Form.Item
                 label="Giới tính"
                 name="gender"
-                rules={[{ required: true }]}
+                rules={[{ required: true, message: "Vui lòng chọn giới tính" }]}
               >
                 <div>
                   <label style={{ paddingRight: "40px" }}>
                     <input
                       type="radio"
-                      value="male"
-                      checked={gender === "male"}
+                      value="Nam"
+                      checked={gender === "Nam"}
                       onChange={handleGenderChange}
                       style={{ paddingRight: "15px" }}
                     />
-                    Male
+                    Nam
                   </label>
                   <label style={{ paddingRight: "40px" }}>
                     <input
                       type="radio"
-                      value="female"
-                      checked={gender === "female"}
+                      value="Nữ"
+                      checked={gender === "Nữ"}
                       onChange={handleGenderChange}
                       style={{ paddingRight: "15px" }}
                     />
-                    Female
+                    Nữ
                   </label>
                   <label style={{ paddingRight: "40px" }}>
                     <input
@@ -562,7 +594,7 @@ const EmployeeAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
               <Form.Item
                 label="Tỉnh/Thành phố"
                 name="provinceId"
-                rules={[{ required: true, message: "Please select province" }]}
+                rules={[{ required: true, message: "Vui lòng chọn Tỉnh/Thành phố" }]}
               >
                 <Select
                   value={provinceId}
@@ -586,7 +618,7 @@ const EmployeeAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
               <Form.Item
                 label="Quận/Huyện"
                 name="districtId"
-                rules={[{ required: true, message: "Please select district" }]}
+                rules={[{ required: true, message: "Vui lòng chọn Quận/Huyện" }]}
               >
                 <Select
                   value={districtId}
@@ -610,7 +642,7 @@ const EmployeeAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
               <Form.Item
                 label="Xã/Phường"
                 name="wardId"
-                rules={[{ required: true, message: "Please select wards" }]}
+                rules={[{ required: true, message: "Vui lòng chọn Xã/Phường" }]}
               >
                 <Select
                   value={wardId}
@@ -636,10 +668,10 @@ const EmployeeAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
               <Form.Item
                 label="Địa chỉ chi tiết"
                 name="addressDetail"
-                rules={[{ required: true, message: "" }]}
+                rules={[{ required: true, message: "Vui lòng nhập địa chỉ chi tiết" }]}
               >
                 <Input
-                  placeholder=""
+                  placeholder="Nhập địa chỉ chi tiết"
                   type="text"
                   onChange={(e) => handleChangeAddress(e)}
                 />
@@ -651,7 +683,7 @@ const EmployeeAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
               <Form.Item
                 label="Quyền"
                 name="roleId"
-                rules={[{ required: true, message: "" }]}
+                rules={[{ required: true, message: "Vui lòng chọn quyền" }]}
               >
                 <Select
                   placeholder="Please select"

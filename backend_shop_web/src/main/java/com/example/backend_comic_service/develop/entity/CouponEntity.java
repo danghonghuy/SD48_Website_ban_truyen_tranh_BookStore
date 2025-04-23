@@ -53,11 +53,11 @@ public class CouponEntity {
     @Column(name = "date_end")
     private LocalDateTime dateEnd;
     @Column(name = "created_date")
-    private  Date createdDate;
+    private  LocalDateTime createdDate;
     @Column(name = "created_by")
     private Integer createdBy;
     @Column(name =  "updated_date")
-    private  Date updatedDate;
+    private  LocalDateTime updatedDate;
     @Column(name = "updated_by")
     private  Integer updated_by;
     @Column(name = "quantity_used")

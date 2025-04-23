@@ -379,6 +379,37 @@ function OrderManager() {
       },
     },
     {
+      title: "Loại thanh toán",
+      dataIndex: "paymentId",
+      key: "paymentId",
+      render: (_, record) => {
+        if (record.paymentId === 1) {
+          return (
+            <p style={{ fontSize: "13px", fontWeight: "300" }}>Tiền mặt</p>
+          );
+        }
+        if (record.paymentId === 2) {
+          return (
+            <p style={{ fontSize: "13px", fontWeight: "300" }}>
+              Chuyển khoản ngân hàng
+            </p>
+          );
+        }
+        if (record.paymentId === 3) {
+          return (
+            <p
+              style={{
+                fontSize: "13px",
+                fontWeight: "300",
+              }}
+            >
+              Ship COD
+            </p>
+          );
+        }
+      },
+    },
+    {
       title: "Thao tác",
       key: "action",
       render: (_, record) => (
@@ -505,7 +536,7 @@ function OrderManager() {
               onChange={setQueryUser}
               style={{ width: "100%" }}
             >
-              <Input placeholder="Enter code, phone number, name customer..." />
+              <Input placeholder="Nhập mã, số điện thoại, tên khách hàng..." />
             </AutoComplete>
           </Form.Item>
         </Col>
@@ -525,7 +556,7 @@ function OrderManager() {
               onChange={setQueryEmployee}
               style={{ width: "100%", height: "40px" }}
             >
-              <Input placeholder="Enter code, phone number, name customer..." />
+              <Input placeholder="Nhập mã, số điện thoại, tên nhân viên..." />
             </AutoComplete>
           </Form.Item>
         </Col>
@@ -545,22 +576,20 @@ function OrderManager() {
         <Col span={6}>
           <Form.Item label="Trạng thái" name="originId" layout="vertical">
             <Select
-              placeholder="Please select"
+              placeholder="Chọn trang thái"
               onChange={handleChangeStatusSelect}
               style={{
                 width: "100%",
                 height: "40px",
               }}
             >
-              <Option value={0}>Tất cả</Option>
-              <Option value={1}>Đã hủy</Option>
-              <Option value={2}>Chờ xác nhận</Option>
-              <Option value={3}>Xác nhận</Option>
-              <Option value={4}>Chờ vận chuyển</Option>
-              <Option value={5}>Đang vận chuyển</Option>
-              <Option value={6}>Đã giao hàng</Option>
-              <Option value={7}>Đã thanh toán</Option>
-              <Option value={7}>Hoàn thành</Option>
+              <Option value={0}>Tạo đơn thất bại</Option>
+              <Option value={1}>Chờ xác nhận</Option>
+              <Option value={2}>Đã xác nhận</Option>
+              <Option value={3}>Chờ vận chuyển</Option>
+              <Option value={4}>Đang vận chuyển</Option>
+              <Option value={5}>Hoàn thành</Option>
+              <Option value={6}>Hủy đơn</Option>
             </Select>
           </Form.Item>
         </Col>
@@ -576,14 +605,14 @@ function OrderManager() {
             <Row gutter={[16, 16]}>
               <Col span={12}>
                 <Input
-                  placeholder="Enter start price"
+                  placeholder="Nhập giá bắt đầu"
                   type="number"
                   onChange={onSearchMinValue}
                 />
               </Col>
               <Col span={12}>
                 <Input
-                  placeholder="Enter end price"
+                  placeholder="Nhập giá kết thúc"
                   type="number"
                   onChange={onSearchMaxValue}
                 />

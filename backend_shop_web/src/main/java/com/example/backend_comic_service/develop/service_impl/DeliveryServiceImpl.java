@@ -22,6 +22,7 @@ import org.springframework.util.StringUtils;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -92,10 +93,10 @@ public class DeliveryServiceImpl implements IDeliveryService {
             }
             if(Optional.ofNullable(model.getId()).orElse(0) <= 0){
                 deliveryEntity.setCreatedBy(userEntity.getId());
-                deliveryEntity.setCreatedDate(Date.valueOf(LocalDate.now()));
+                deliveryEntity.setCreatedDate(LocalDateTime.now());
             }
             deliveryEntity.setUpdatedBy(userEntity.getId());
-            deliveryEntity.setUpdatedDate(Date.valueOf(LocalDate.now()));
+            deliveryEntity.setUpdatedDate(LocalDateTime.now());
             DeliveryEntity deliveryEntity1 = deliveryRepository.saveAndFlush(deliveryEntity);
             if(deliveryEntity1.getId() != null){
                 if(model.getId() != null){

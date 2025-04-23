@@ -65,14 +65,14 @@ function CatalogManager() {
             render: (_, __, index) => <a style={{ fontSize: "13px", color: "black", fontWeight: "300" }}>{index + 1}</a>,
         },
         {
-            title: 'Code',
+            title: 'Mã danh mục',
             dataIndex: 'code',
             key: 'code',
             render: (text) => <a style={{ fontSize: "13px", color: "black", fontWeight: "300" }}>{text}</a>,
         },
 
         {
-            title: 'Tên',
+            title: 'Tên danh mục',
             dataIndex: 'name',
             key: 'name',
             render: (_, record) => <a style={{ fontSize: "13px", color: "black", fontWeight: "300" }}>{record.name}</a>
@@ -98,7 +98,7 @@ function CatalogManager() {
         },
         {
 
-            title: 'Action',
+            title: 'Thao tác',
             key: 'action',
             render: (_, record) => (
                 <Space>
@@ -196,7 +196,7 @@ function CatalogManager() {
                         <Form.Item
                             label="Key search"
                             name="keySearch"
-                            rules={[{ required: false, message: "Please input product name!" }]}><Input placeholder="Enter code, name category" onChange={(e) => handleChangeName(e)} />
+                            rules={[{ required: false, message: "Please input product name!" }]}><Input placeholder="Nhập mã, tên danh mục" onChange={(e) => handleChangeName(e)} />
                         </Form.Item>
                     </Col>
                     <Col span={8}>

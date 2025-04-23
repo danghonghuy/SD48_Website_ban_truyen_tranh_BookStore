@@ -1,14 +1,18 @@
 package com.example.backend_comic_service.develop.model.model;
 
 import com.example.backend_comic_service.develop.entity.UserEntity;
+import com.example.backend_comic_service.develop.utils.Common;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @AllArgsConstructor
@@ -28,8 +32,12 @@ public class UserModel {
     private boolean gender;
     private String userName;
     private String password;
-    private Date createdDate;
-    private Date updatedDate;
+    @DateTimeFormat(pattern = Common.FORMAT_DD_MM_YYYY_TIME)
+    @JsonFormat(pattern = Common.FORMAT_DD_MM_YYYY_TIME, timezone = "Asia/Ho_Chi_Minh")
+    private LocalDateTime createdDate;
+    @DateTimeFormat(pattern = Common.FORMAT_DD_MM_YYYY_TIME)
+    @JsonFormat(pattern = Common.FORMAT_DD_MM_YYYY_TIME, timezone = "Asia/Ho_Chi_Minh")
+    private LocalDateTime updatedDate;
     private Integer createdBy;
     private Integer updatedBy;
     private Integer status;
@@ -50,8 +58,8 @@ public class UserModel {
         userEntity.setGender(gender);
         userEntity.setUserName(userName);
         userEntity.setPassword(password);
-        userEntity.setCreatedDate(Date.valueOf(LocalDate.now()));
-        userEntity.setUpdatedDate(Date.valueOf(LocalDate.now()));
+        userEntity.setCreatedDate(LocalDateTime.now());
+        userEntity.setUpdatedDate(LocalDateTime.now());
         userEntity.setCreatedBy(createdBy);
         userEntity.setUpdatedBy(updatedBy);
         userEntity.setStatus(status);

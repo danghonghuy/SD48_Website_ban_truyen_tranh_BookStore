@@ -26,6 +26,8 @@ public enum ErrorCodeConst {
     POINT_SOURCE_IS_EXIST("point.source.is.exist", HttpStatus.BAD_REQUEST.value(),"point.source.is.exist"),
     NOT_FOUND_POINT("not.found.point", HttpStatus.BAD_REQUEST.value(),"not.found.point"),
     NOT_FOUND_FEE("not.found.fee", HttpStatus.BAD_REQUEST.value(),"not.found.fee"),
+    NOT_FOUND_CATEGORY("not.found.category", HttpStatus.BAD_REQUEST.value(),"not.found.category"),
+    NOT_FOUND_TYPE("not.found.type", HttpStatus.BAD_REQUEST.value(),"not.found.type"),
     ;
 
     private final String code;

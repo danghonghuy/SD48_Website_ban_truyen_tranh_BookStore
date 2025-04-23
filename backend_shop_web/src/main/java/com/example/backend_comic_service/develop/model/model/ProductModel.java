@@ -1,14 +1,16 @@
 package com.example.backend_comic_service.develop.model.model;
 
-import com.example.backend_comic_service.develop.entity.CategoryEntity;
+import com.example.backend_comic_service.develop.configs.configs_sercurity_service.LocalDateDeserializer;
 import com.example.backend_comic_service.develop.entity.ProductEntity;
-import com.example.backend_comic_service.develop.entity.TypeEntity;
+import com.example.backend_comic_service.develop.utils.Common;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.format.annotation.DateTimeFormat;
 
-import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @AllArgsConstructor
@@ -22,14 +24,20 @@ public class ProductModel {
     private String code;
     private String name;
     private String description;
-    private Date datePublish;
+    @DateTimeFormat(pattern = Common.FORMAT_DD_MM_YYYY)
+    @JsonFormat(pattern = Common.FORMAT_DD_MM_YYYY, timezone = "Asia/Ho_Chi_Minh")
+    private LocalDate datePublish;
     private float price;
     private float priceDiscount;
     private Integer stock;
     private Integer format;
-    private Date createdDate;
+    @DateTimeFormat(pattern = Common.FORMAT_DD_MM_YYYY_TIME)
+    @JsonFormat(pattern = Common.FORMAT_DD_MM_YYYY_TIME, timezone = "Asia/Ho_Chi_Minh")
+    private LocalDateTime createdDate;
     private Integer createdBy;
-    private Date updatedDate;
+    @DateTimeFormat(pattern = Common.FORMAT_DD_MM_YYYY_TIME)
+    @JsonFormat(pattern = Common.FORMAT_DD_MM_YYYY_TIME, timezone = "Asia/Ho_Chi_Minh")
+    private LocalDateTime updatedDate;
     private Integer updatedBy;
     private  Integer isDeleted;
     private Integer categoryId;
@@ -43,7 +51,9 @@ public class ProductModel {
     private String series;
     private String author;
     private String publisher;
-    private Date datePublic;
+    @DateTimeFormat(pattern = Common.FORMAT_DD_MM_YYYY)
+    @JsonFormat(pattern = Common.FORMAT_DD_MM_YYYY, timezone = "Asia/Ho_Chi_Minh")
+    private LocalDate datePublic;
     private Integer status;
     public ProductEntity toEntity() {
         ProductEntity productEntity = new ProductEntity();

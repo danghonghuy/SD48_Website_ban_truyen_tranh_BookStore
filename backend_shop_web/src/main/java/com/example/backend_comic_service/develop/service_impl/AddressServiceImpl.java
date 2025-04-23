@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -46,9 +47,9 @@ public class AddressServiceImpl implements IAddressService {
                     AddressEntity addressEntity = new AddressEntity();
                     addressEntity.setId(item.getId());
                     addressEntity.setAddressDetail(item.getAddressDetail());
-                    addressEntity.setCreatedDate(Date.valueOf(LocalDate.now()));
+                    addressEntity.setCreatedDate(LocalDateTime.now());
                     addressEntity.setCreatedBy(userHandle.getId());
-                    addressEntity.setUpdatedDate(Date.valueOf(LocalDate.now()));
+                    addressEntity.setUpdatedDate(LocalDateTime.now());
                     addressEntity.setUpdatedBy(userHandle.getId());
                     addressEntity.setProvince(provincesEntities.stream().filter(e -> Objects.equals(e.getCode(), item.getProvinceId())).findFirst().orElse(null));
                     addressEntity.setDistrict(districtEntities.stream().filter(e -> Objects.equals(e.getCode(), item.getDistrictId())).findFirst().orElse(null));

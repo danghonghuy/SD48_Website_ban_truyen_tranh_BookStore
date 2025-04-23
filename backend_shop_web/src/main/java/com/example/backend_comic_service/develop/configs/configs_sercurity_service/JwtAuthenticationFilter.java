@@ -19,6 +19,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -89,6 +90,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
-        return path.endsWith("/login") || path.endsWith("/public")  || path.endsWith("/register");
+        return path.endsWith("/login") || path.endsWith("/public")
+                || path.contains("/api/product/get-list-product")
+                || path.contains("/api/product/detail")
+                || path.contains("/uploads")
+                || path.contains("/api/category/get-category-list");
     }
 }

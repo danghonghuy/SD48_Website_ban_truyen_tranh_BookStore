@@ -514,7 +514,13 @@ const UserAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
               <Form.Item
                 label="Email"
                 name="email"
-                rules={[{ required: true, message: "" }]}
+                rules={[
+                  { required: true, message: "Vui lòng nhập email" },
+                  {
+                    type: "email",
+                    message: "Vui lòng nhập đúng định dạng email",
+                  },
+                ]}
               >
                 <Input placeholder="" type="text" />
               </Form.Item>
@@ -526,7 +532,7 @@ const UserAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
               <Form.Item
                 label="Họ tên khách hàng"
                 name="fullName"
-                rules={[{ required: true, message: "" }]}
+                rules={[{ required: true, message: "Vui lòng nhập họ và tên" }]}
               >
                 <Input placeholder="" type="text" />
               </Form.Item>
@@ -536,7 +542,14 @@ const UserAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
               <Form.Item
                 label="Số điện thoại khách hàng"
                 name="phoneNumber"
-                rules={[{ required: true, message: "" }]}
+                rules={[
+                  { required: true, message: "Vui lòng nhập số điện thoại" },
+                  {
+                    type: "regexp",
+                    pattern: new RegExp(/\d+/g),
+                    message: "Vui lòng nhập đúng định dạng số điện thoại",
+                  },
+                ]}
               >
                 <Input placeholder="" type="text" />
               </Form.Item>
@@ -547,7 +560,7 @@ const UserAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
               <Form.Item
                 label="Username"
                 name="userName"
-                rules={[{ required: true, message: "" }]}
+                rules={[{ required: true, message: "Vui lòng nhập username" }]}
               >
                 <Input placeholder="" type="text" />
               </Form.Item>
@@ -563,9 +576,9 @@ const UserAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
             </Col>
             <Col span={24}>
               <Form.Item
-                label="Desciption"
+                label="Mô tả"
                 name="description"
-                rules={[{ required: true, message: "" }]}
+                rules={[{ required: true, message: "Vui lòng nhập mô tả" }]}
               >
                 <TextArea
                   rows={3}
@@ -581,7 +594,7 @@ const UserAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
               <Form.Item
                 label="Giới tính"
                 name="gender"
-                rules={[{ required: true }]}
+                rules={[{ required: true, message: "Vui lòng chọn giới tính" }]}
               >
                 <div>
                   <label style={{ paddingRight: "40px" }}>

@@ -1,5 +1,6 @@
 package com.example.backend_comic_service.develop.entity;
 
+import com.example.backend_comic_service.develop.enums.OrderStatusEnum;
 import com.example.backend_comic_service.develop.model.model.OrderDetailModel;
 import com.example.backend_comic_service.develop.model.model.OrderModel;
 import jakarta.persistence.*;
@@ -10,6 +11,9 @@ import lombok.Setter;
 import org.aspectj.weaver.ast.Or;
 
 import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -26,7 +30,7 @@ public class OrderEntity {
     @Column(name = "code")
     private String code;
     @Column(name = "order_date")
-    private Date orderDate;
+    private LocalDate orderDate;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private UserEntity user;
@@ -35,8 +39,11 @@ public class OrderEntity {
     private PaymentEntity payment;
     @Column(name = "total_price")
     private Double totalPrice;
+
     @Column(name = "status")
+//    @Enumerated(EnumType.ORDINAL)
     private Integer status;
+
     @Column(name = "stage")
     private Integer stage;
     @Column(name = "fee_delivery")
@@ -51,11 +58,11 @@ public class OrderEntity {
     @Column(name = "real_price")
     private Integer realPrice;
     @Column(name = "created_date")
-    private Date createdDate;
+    private LocalDateTime createdDate;
     @Column(name = "created_by")
     private Integer createdBy;
     @Column(name = "updated_date")
-    private Date updatedDate;
+    private LocalDateTime updatedDate;
     @Column(name = "updated_by")
     private Integer updatedBy;
     @ManyToOne
@@ -68,6 +75,9 @@ public class OrderEntity {
     private Integer couponId;
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<OrderDetailEntity> orderDetailEntities;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LogPaymentHistoryEntity> paymentHistoryEntities;
+
     @Column(name = "user_type")
     private Integer userType;
     public OrderModel toModel(){
@@ -86,7 +96,7 @@ public class OrderEntity {
         orderModel.setCouponId(couponId);
         orderModel.setType(type);
         orderModel.setUserType(userType);
-        orderModel.setStatus(status);
+        orderModel.setStatus(OrderStatusEnum.fromValue(status));
         return orderModel;
     }
 

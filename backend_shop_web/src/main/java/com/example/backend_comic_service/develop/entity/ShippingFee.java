@@ -1,5 +1,6 @@
 package com.example.backend_comic_service.develop.entity;
 
+import com.example.backend_comic_service.develop.enums.StatusFeeEnum;
 import com.example.backend_comic_service.develop.model.dto.ShippingFeeDTO;
 import jakarta.persistence.*;
 import lombok.*;

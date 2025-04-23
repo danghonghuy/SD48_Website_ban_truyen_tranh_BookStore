@@ -3,6 +3,7 @@ package com.example.backend_comic_service.develop.controller;
 import com.example.backend_comic_service.develop.model.base_response.BaseListResponseModel;
 import com.example.backend_comic_service.develop.model.base_response.BaseResponseModel;
 import com.example.backend_comic_service.develop.model.model.CouponModel;
+import com.example.backend_comic_service.develop.model.model.CouponRequest;
 import com.example.backend_comic_service.develop.service.ICouponService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -20,8 +21,8 @@ public class CouponController {
     private ICouponService couponService;
 
     @PostMapping("/add-or-change")
-    public BaseResponseModel<CouponModel> addOrChange(@RequestBody CouponModel model) {
-        return couponService.addOrChange(model);
+    public BaseResponseModel<CouponModel> addOrChange(@RequestBody CouponRequest request) {
+        return couponService.addOrChange(request);
     }
     @GetMapping("/delete")
     public BaseResponseModel<Integer> changeStatus(@RequestParam(value = "id", required = false)  Integer id,
@@ -32,6 +33,12 @@ public class CouponController {
     public BaseResponseModel<CouponModel> detail(@PathVariable Integer id) {
         return couponService.getCouponById(id);
     }
+
+    @GetMapping("{code}/detail")
+    public BaseResponseModel<CouponModel> detail(@PathVariable String code) {
+        return couponService.getCouponByCode(code);
+    }
+
     @GetMapping("/get-list-coupon")
     public BaseListResponseModel<List<CouponModel>> getListDiscount(@RequestParam(value = "startDate", required = false) Date startDate,
                                                                       @RequestParam(value = "endDate", required = false)Date endDate,

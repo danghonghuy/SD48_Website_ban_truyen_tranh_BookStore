@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,10 +59,10 @@ public class RoleServiceImpl implements IRoleService {
             }else{
                 roleEntity = model.toRoleEntity();
                 roleEntity.setCreatedBy(userEntity.getId());
-                roleEntity.setCreatedDate(Date.valueOf(LocalDate.now()));
+                roleEntity.setCreatedDate(LocalDateTime.now());
             }
             roleEntity.setUpdatedBy(userEntity.getId());
-            roleEntity.setUpdatedDate(Date.valueOf(LocalDate.now()));
+            roleEntity.setUpdatedDate(LocalDateTime.now());
             RoleEntity roleSave =  roleRepository.save(roleEntity);
             if(roleSave.getId() != null) {
                 response.successResponse(roleSave.getId(),  "Update success" );

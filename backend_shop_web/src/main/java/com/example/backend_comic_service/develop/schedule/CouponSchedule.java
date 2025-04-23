@@ -1,7 +1,6 @@
 package com.example.backend_comic_service.develop.schedule;
 
 import com.example.backend_comic_service.develop.constants.CouponStatusEnum;
-import com.example.backend_comic_service.develop.constants.DiscountStatusEnum;
 import com.example.backend_comic_service.develop.repository.CouponRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -9,6 +9,7 @@ import { Option } from "antd/es/mentions";
 import TextArea from "antd/es/input/TextArea";
 import { format } from "date-fns";
 import dayjs from "dayjs";
+import { InputNumber } from "antd";
 
 const CouponAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
   const { generateCode, addOrChange } = useCoupon();
@@ -77,9 +78,15 @@ const CouponAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
         description: modelItem.description,
         typeId: modelItem.type,
         couponAmount: modelItem.couponAmount,
-        minValue: modelItem.minValue,
+        percentValue: modelItem.percentValue,
         maxValue: modelItem.maxValue,
         quantity: modelItem.quantity,
+        dateStart: modelItem.dateStartEpochTime
+          ? dayjs(modelItem.dateStartEpochTime)
+          : undefined,
+        dateEnd: modelItem.dateEndEpochTime
+          ? dayjs(modelItem.dateEndEpochTime)
+          : undefined,
       });
       setStartDate(new Date(modelItem.dateStartEpochTime));
       setEndDate(new Date(modelItem.dateEndEpochTime));
@@ -97,7 +104,7 @@ const CouponAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
         price: values.price,
         description: values.description,
         type: values.typeId,
-        minValue: values.minValue,
+        percentValue: values.percentValue,
         maxValue: values.maxValue,
         dateStart: dayjs(startDate).toISOString(),
         dateEnd: dayjs(endDate).toISOString(),
@@ -127,6 +134,22 @@ const CouponAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
   const handleChange = (value) => {
     console.log(`Selected: ${value}`);
   };
+  const checkStartDate = (_, value) => {
+    if (dayjs(startDate).isAfter(dayjs(endDate))) {
+      return Promise.reject(
+        new Error("Ngày bắt đầu phải trước ngày kết thúc!")
+      );
+    }
+    return Promise.resolve();
+  };
+
+  const checkEndDate = (_, value) => {
+    if (dayjs(endDate).isBefore(dayjs(startDate))) {
+      return Promise.reject(new Error("Ngày kết thúc phải sau ngày bắt đầu!"));
+    }
+    return Promise.resolve();
+  };
+
   return (
     <div>
       <Button
@@ -166,7 +189,10 @@ const CouponAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
                 label="Mã khuyến mại"
                 name="code"
                 rules={[
-                  { required: true, message: "Please input Coupon code!" },
+                  {
+                    required: true,
+                    message: "Vui lòng nhập mã phiếu giảm giá!",
+                  },
                 ]}
               >
                 <Input placeholder="" readOnly={true} />
@@ -175,10 +201,13 @@ const CouponAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
 
             <Col span={12}>
               <Form.Item
-                label="Tên khuyến mại"
+                label="Tên phiếu giảm giá"
                 name="name"
                 rules={[
-                  { required: true, message: "Please input Coupon name!" },
+                  {
+                    required: true,
+                    message: "Vui lòng nhập tên phiếu giảm giá!",
+                  },
                 ]}
               >
                 <Input placeholder="" />
@@ -189,7 +218,12 @@ const CouponAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
               <Form.Item
                 label="Loại khuyến mại"
                 name="typeId"
-                rules={[{ required: true, message: "Please select coupon!" }]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng chọn loại phiếu giảm giá!",
+                  },
+                ]}
               >
                 <Select
                   placeholder=""
@@ -210,7 +244,10 @@ const CouponAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
                 label="Giá trị"
                 name="couponAmount"
                 rules={[
-                  { required: true, message: "Please input Coupon amount!" },
+                  {
+                    required: true,
+                    message: "Vui lòng nhập số tiền phiếu giảm giá!",
+                  },
                 ]}
               >
                 <Input placeholder="" type="number" />
@@ -220,10 +257,20 @@ const CouponAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
             <Col span={12}>
               <Form.Item
                 label="Giá trị tối thiểu"
-                name="minValue"
-                rules={[{ required: true, message: "Please input min value!" }]}
+                name="percentValue"
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng nhập giá trị tối thiểu!",
+                  },
+                ]}
               >
-                <Input placeholder="" type="number" />
+                <InputNumber
+                  placeholder=""
+                  type="number"
+                  min={0}
+                  style={{ width: "100%", height: "40px" }}
+                />
               </Form.Item>
             </Col>
 
@@ -231,13 +278,27 @@ const CouponAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
               <Form.Item
                 label="Giá trị tối đa"
                 name="maxValue"
-                rules={[{ required: true, message: "Please input max value!" }]}
+                rules={[
+                  { required: true, message: "Vui lòng nhập giá trị tối đa!" },
+                ]}
               >
-                <Input placeholder="" type="number" />
+                <InputNumber
+                  placeholder=""
+                  type="number"
+                  min={0}
+                  style={{ width: "100%", height: "40px" }}
+                />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item label="Ngày bắt đầu" name="dateStart">
+              <Form.Item
+                label="Ngày bắt đầu"
+                name="dateStart"
+                rules={[
+                  { required: true, message: "Please input date start!" },
+                  { validator: checkStartDate },
+                ]}
+              >
                 <DatePicker
                   showTime={{ format: "HH:mm:ss" }} // Enables time selection
                   onChange={handleSetStartDate}
@@ -250,7 +311,14 @@ const CouponAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item label="Ngày kết thúc" name="dateEnd">
+              <Form.Item
+                label="Ngày kết thúc"
+                name="dateEnd"
+                rules={[
+                  { validator: checkEndDate },
+                  { required: true, message: "Please input date end!" },
+                ]}
+              >
                 <DatePicker
                   showTime={{ format: "HH:mm:ss" }} // Enables time selection
                   onChange={handleSetEndDate}
@@ -267,9 +335,14 @@ const CouponAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
               <Form.Item
                 label="Số lượng"
                 name="quantity"
-                rules={[{ required: true, message: "Please input quantity!" }]}
+                rules={[{ required: true, message: "Vui lòng nhập số lượng!" }]}
               >
-                <Input placeholder="" type="number" />
+                <InputNumber
+                  placeholder=""
+                  type="number"
+                  min={0}
+                  style={{ width: "100%", height: "40px" }}
+                />
               </Form.Item>
             </Col>
 
@@ -281,7 +354,7 @@ const CouponAddOrChange = ({ fetchData, modelItem, textButton, isStyle }) => {
           </Row>
           <Form.Item>
             <Button type="primary" htmlType="submit">
-              Lưu thông tin
+              Thêm
             </Button>
           </Form.Item>
         </Form>

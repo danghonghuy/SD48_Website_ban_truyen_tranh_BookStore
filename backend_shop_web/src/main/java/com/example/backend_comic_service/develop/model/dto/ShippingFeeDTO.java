@@ -1,7 +1,7 @@
 package com.example.backend_comic_service.develop.model.dto;
 
 
-import com.example.backend_comic_service.develop.entity.StatusFeeEnum;
+import com.example.backend_comic_service.develop.enums.StatusFeeEnum;
 import com.example.backend_comic_service.develop.utils.Common;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.format.annotation.DateTimeFormat;

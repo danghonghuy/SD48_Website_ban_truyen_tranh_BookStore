@@ -1,6 +1,6 @@
 package com.example.backend_comic_service.develop.service_impl;
 
-import com.example.backend_comic_service.develop.constants.OrderStatusEnum;
+import com.example.backend_comic_service.develop.enums.OrderStatusEnum;
 import com.example.backend_comic_service.develop.entity.*;
 import com.example.backend_comic_service.develop.model.base_response.BaseListResponseModel;
 import com.example.backend_comic_service.develop.model.base_response.BaseResponseModel;
@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -60,8 +61,8 @@ public class OrderDetailServiceImpl implements IOrderDetailService {
                     object.setPrice(m.getPrice());
                     object.setQuantity(m.getQuantity());
                     object.setTotal((int) (m.getPrice() * m.getQuantity()));
-                    object.setCreatedDate(Date.valueOf(LocalDate.now()));
-                    object.setUpdatedDate(Date.valueOf(LocalDate.now()));
+                    object.setCreatedDate(LocalDateTime.now());
+                    object.setUpdatedDate(LocalDateTime.now());
                     object.setCreatedBy(userEntity.getId());
                     object.setUpdatedBy(userEntity.getId());
                     object.setOrder(orderEntity);
@@ -73,21 +74,21 @@ public class OrderDetailServiceImpl implements IOrderDetailService {
                     return -1;
                 }
             }
-            List<OrderDetailEntity> result =  orderDetailRepository.saveAllAndFlush(orderDetailEntities);
-            if(!result.isEmpty()){
-                ExecutorService executor = Executors.newSingleThreadExecutor();
-                executor.submit(() -> {
-                    try{
-                        orderDetailRepository.updateStockProduct(orderEntity.getId());
-                    }
-                    catch (Exception e){
-                        log.error(e.getMessage());
-                    }
-                });
-                executor.shutdown();
-                return 1;
-            }
-            return -1;
+            orderDetailRepository.saveAllAndFlush(orderDetailEntities);
+//            if(!result.isEmpty()){
+//                ExecutorService executor = Executors.newSingleThreadExecutor();
+//                executor.submit(() -> {
+//                    try{
+//                        orderDetailRepository.updateStockProduct(orderEntity.getId());
+//                    }
+//                    catch (Exception e){
+//                        log.error(e.getMessage());
+//                    }
+//                });
+//                executor.shutdown();
+//                return 1;
+//            }
+            return 1;
        }
        catch (Exception e){
            orderRepository.updateOrderStatus(OrderStatusEnum.ORDER_STATUS_FAIL, orderEntity.getId());
@@ -124,15 +125,21 @@ public class OrderDetailServiceImpl implements IOrderDetailService {
             }
 
             OrderModel orderModel = orderEntity.toModel();
-
             List<LogActionOrderEntity> logActionOrderEntities = logActionOrderRepository.findByOrderId(orderModel.getId());
 
             if(!logActionOrderEntities.isEmpty()){
                 orderModel.setLogActionOrderModels(logActionOrderEntities.stream().map(LogActionOrderEntity::toModel).collect(Collectors.toList()));
             }
-            CouponEntity couponEntity = couponRepository.findById(orderModel.getCouponId()).orElse(null);
-            if(couponEntity != null){
-                orderModel.setCouponModel(couponEntity.toCouponModel());
+            if (orderModel.getCouponId() != null) {
+                CouponEntity couponEntity = couponRepository.findById(orderModel.getCouponId()).orElse(null);
+                if(couponEntity != null){
+                    orderModel.setCouponModel(couponEntity.toCouponModel());
+                }
+            }
+
+            List<LogPaymentHistoryEntity> paymentHistoryEntities = orderEntity.getPaymentHistoryEntities();
+            if (!paymentHistoryEntities.isEmpty()) {
+                orderModel.setLogPaymentHistoryModels(paymentHistoryEntities.stream().map(LogPaymentHistoryEntity::toModel).collect(Collectors.toList()));
             }
             response.successResponse(orderModel, "Success");
             return response;

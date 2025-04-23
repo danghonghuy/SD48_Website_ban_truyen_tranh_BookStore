@@ -266,7 +266,7 @@ function ProductTypeManager() {
               ]}
             >
               <Input
-                placeholder="Enter code, name category"
+                placeholder="Nhập mã, tên gói bán"
                 onChange={(e) => handleChangeName(e)}
               />
             </Form.Item>

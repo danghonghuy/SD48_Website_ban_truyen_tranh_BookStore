@@ -194,7 +194,7 @@ function DiscountManager() {
       key: "dateStart",
       render: (_, record) => (
         <p style={{ fontSize: "13px", color: "black", fontWeight: "300" }}>
-          {format(record.startDate, "dd-MM-yyyy")}
+          {record.startDate}
         </p>
       ),
     },
@@ -204,7 +204,7 @@ function DiscountManager() {
       key: "dateEnd",
       render: (_, record) => (
         <p style={{ fontSize: "13px", color: "black", fontWeight: "300" }}>
-          {format(record.endDate, "dd-MM-yyyy")}
+          {record.endDate}
         </p>
       ),
     },
@@ -213,16 +213,24 @@ function DiscountManager() {
       dataIndex: "status",
       key: "status",
       render: (value) => {
+        if (value === 0) {
+          return (
+            <p style={{ fontSize: "13px", color: "black", fontWeight: "300" }}>
+              Đã kết thúc
+            </p>
+          );
+        }
         if (value === 1) {
           return (
             <p style={{ fontSize: "13px", color: "black", fontWeight: "300" }}>
-              Hoạt động
+              Đang diễn ra
             </p>
           );
-        } else {
+        }
+        if (value === 2) {
           return (
             <p style={{ fontSize: "13px", color: "black", fontWeight: "300" }}>
-              Không hoạt động
+              Sắp diễn ra
             </p>
           );
         }
@@ -239,7 +247,7 @@ function DiscountManager() {
             textButton={"Sửa"}
             isStyle={true}
           />
-          {record.status === 1 && (
+          {/* {record.status === 1 && (
             <Button
               type={"primary"}
               value="small"
@@ -267,7 +275,7 @@ function DiscountManager() {
               {" "}
               Mở khóa{" "}
             </Button>
-          )}
+          )} */}
         </Space>
       ),
     },
@@ -356,8 +364,9 @@ function DiscountManager() {
                   height: "40px",
                 }}
               >
-                <Option value={1}>Hoạt động</Option>
-                <Option value={0}>Không hoạt động</Option>
+                <Option value={0}>Đã kết thúc</Option>
+                <Option value={1}>Đang diễn ra</Option>
+                <Option value={2}>Săp diễn ra</Option>
               </Select>
             </Form.Item>
           </Col>

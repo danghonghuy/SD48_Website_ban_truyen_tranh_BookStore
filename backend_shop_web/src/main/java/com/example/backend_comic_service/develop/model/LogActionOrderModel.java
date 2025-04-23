@@ -3,6 +3,7 @@ package com.example.backend_comic_service.develop.model;
 import lombok.*;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,5 +18,5 @@ public class LogActionOrderModel {
     private String userName;
     private Integer status;
     private String statusName;
-    private Date createdDate;
+    private LocalDateTime createdDate;
 }

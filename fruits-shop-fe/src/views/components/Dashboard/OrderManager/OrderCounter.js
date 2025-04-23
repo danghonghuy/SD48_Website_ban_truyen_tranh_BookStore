@@ -27,6 +27,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import useShippingFee from "@api/useShippingFee";
 import { Radio } from "antd";
 import { DELIVERY_STATUS } from "@constants/orderStatusConstant";
+import BillPopUp from "./BillPopup";
 const Tab = ({ label, activeTab, setActiveTab, closeTab }) => {
   return (
     <div
@@ -67,6 +68,8 @@ const Tab = ({ label, activeTab, setActiveTab, closeTab }) => {
 const OrderCounter = () => {
   const [loading, setLoading] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [openModalBill, setOpenModalBill] = useState(false);
+  const [tabIdPayment, setTabIdPayment] = useState(null);
   const [tabs, setTabs] = useState(() => {
     var models = localStorage.getItem("orderForms");
     setIsLoaded(true);
@@ -167,18 +170,32 @@ const OrderCounter = () => {
     }
   };
   const fetchPayment = async () => {
-    const { success, data } = await getListPayment(tableParams.pagination);
-    if (!success || data.status == "Error") {
-      toast.error("Có lỗi xảy ra");
-    } else {
-      const result = data.data.map((e) => {
-        return {
-          value: e.id,
-          label: e.name,
-        };
-      });
-      setPayments(result);
-    }
+    const result = [
+      // {
+      //   value: 3,
+      //   label: "Ship COD",
+      // },
+      {
+        value: 2,
+        label: "Chuyển khoản ngân hàng",
+      },
+      {
+        value: 1,
+        label: "Tiền mặt",
+      },
+    ];
+    // const { success, data } = await getListPayment(tableParams.pagination);
+    // if (!success || data.status == "Error") {
+    //   toast.error("Có lỗi xảy ra");
+    // } else {
+    //   const result = data.data.map((e) => {
+    //     return {
+    //       value: e.id,
+    //       label: e.name,
+    //     };
+    //   });
+    // }
+    setPayments(result);
   };
   const fetchDelivery = async () => {
     const { success, data } = await getListDelivery(tableParams.pagination);
@@ -198,28 +215,42 @@ const OrderCounter = () => {
   const onCreateOrder = async (modelProducts, tabIds) => {
     try {
       const tabInfoModel = tabs[tabs.findIndex((e) => e.id === tabIds)];
-      const addressModel = tabInfoModel.address.map((e) => {
-        return {
-          provinceId: e.provinceId,
-          districtId: e.districtId,
-          wardId: e.wardId,
-          addressDetail: e.addressDetail,
-          stage: 1,
-          provinceName: e.provinceName,
-          districtName: e.districtName,
-          wardName: e.wardName,
-          id: e.id,
-        };
-      });
+      const addressModel =
+        tabInfoModel.address && tabInfoModel.address.length > 0
+          ? tabInfoModel.address?.map((e) => {
+              return {
+                provinceId: e.provinceId,
+                districtId: e.districtId,
+                wardId: e.wardId,
+                addressDetail: e.addressDetail,
+                stage: 1,
+                provinceName: e.provinceName,
+                districtName: e.districtName,
+                wardName: e.wardName,
+                id: e.id,
+              };
+            })
+          : [
+              {
+                provinceId: tabInfoModel.provinceId,
+                districtId: tabInfoModel.districtId,
+                wardId: tabInfoModel.wardId,
+                addressDetail: tabInfoModel.address.addressDetail,
+                stage: 1,
+              },
+            ];
       const model = {
         code: tabInfoModel.userModel ? tabInfoModel.userModel.code : null,
-        fullName: tabInfoModel.fullName,
-        phoneNumber: tabInfoModel.phoneNumber,
-        email: tabInfoModel.email,
+        fullName: tabInfoModel.userModel?.fullName,
+        phoneNumber: tabInfoModel.userModel?.phoneNumber,
+        email: tabInfoModel.userModel?.email,
         dateBirth: null,
-        userName: tabInfoModel.email,
+        userName: tabInfoModel.userModel?.userName,
         gender: false,
-        address: addressModel,
+        address:
+          tabInfoModel.address && tabInfoModel.address.length === 0
+            ? []
+            : addressModel,
         roleId: 8,
         description: "Customer visitor",
         status: 1,
@@ -236,7 +267,7 @@ const OrderCounter = () => {
         };
       });
       var objectModel = {
-        userId: tabInfoModel.userModel ? tabInfoModel.userModel.id : null,
+        userId: tabInfoModel.userModel?.id,
         price: tabInfoModel.totalPrice,
         paymentId: tabInfoModel.paymentId,
         feeDelivery: tabInfoModel.feeDelivery,
@@ -247,19 +278,21 @@ const OrderCounter = () => {
         type: 1,
         realPrice: tabInfoModel.totalPrice,
         addressId: tabInfoModel.userModel
-          ? tabInfoModel.userModel.address &&
-            tabInfoModel.userModel.address[0].id
+          ? tabInfoModel.userModel?.address &&
+            tabInfoModel.userModel?.address[0].id
           : null,
         orderDetailModels: product,
         couponCode: tabInfoModel.couponModel && tabInfoModel.couponModel.code,
         userModel: model,
-        userType: tabInfoModel.userModel ? 2 : 1,
+        userType: tabInfoModel.userModel?.id ? 2 : 1,
         isDeliver: tabInfoModel.isDeliver,
+        isChangeOrder: 0,
       };
       const { success, data } = await createOrder(objectModel);
       if (data.status != "Error" && success) {
         if (data.code == 200) {
-          closeTab(tabIds);
+          setOpenModalBill(true);
+          setTabIdPayment(tabIds);
           toast.success(data.message);
         } else {
           toast.error(data.message);
@@ -328,7 +361,8 @@ const OrderCounter = () => {
     setTabs(modelTabs);
   };
 
-  const handleInputQuantity = (index, value) => {
+  const handleInputQuantity = (index, value, stock) => {
+    if (value > stock) return;
     const tabIndex = tabs.findIndex((e) => e.id === activeTab);
     const modelTabs = [...tabs];
     const models = modelTabs[tabIndex].products;
@@ -361,6 +395,14 @@ const OrderCounter = () => {
       products: models,
       totalPrice: sum,
     };
+    if (models.length === 0) {
+      modelTabs[tabIndex] = {
+        ...modelTabs[tabIndex],
+        products: [],
+        couponModel: "",
+        discount: 0,
+      };
+    }
     setTabs(modelTabs);
   };
   const handleChangeAddress = (e, index) => {
@@ -435,8 +477,11 @@ const OrderCounter = () => {
             style={{ textAlign: "center" }}
             type="number"
             value={record.quantity}
-            onChange={(e) => handleInputQuantity(index, e.target.value)}
+            onChange={(e) =>
+              handleInputQuantity(index, e.target.value, record.stock)
+            }
             min={1}
+            max={record.stock}
           ></Input>
         );
       },
@@ -548,7 +593,6 @@ const OrderCounter = () => {
       ...addressModel[0],
       provinceId: e,
       districtId: 0,
-      provinceId: 0,
     };
     tabModel[index] = {
       ...tabModel[index],
@@ -595,7 +639,7 @@ const OrderCounter = () => {
         phoneNumber: e.phoneNumber,
         email: e.email,
         addressDetail:
-          e.address && e.address.length > 0 && e.address[0].fullInfo,
+          e.address && e.address.length > 0 && e.address[0]?.fullInfo,
         provinceId:
           e.address && e.address.length > 0 && e.address[0].provinceId,
         districtId:
@@ -604,7 +648,8 @@ const OrderCounter = () => {
         address: e.address,
       },
       address: e.address,
-      addressDetail: e.address && e.address.length > 0 && e.address[0].fullInfo,
+      addressDetail:
+        e.address && e.address.length > 0 && e.address[0]?.fullInfo,
       provinceId: e.address && e.address.length > 0 && e.address[0].provinceId,
       districtId:
         e.address && e.address.length > 0 && e.address[0].districtName,
@@ -656,16 +701,21 @@ const OrderCounter = () => {
   };
   const handleSetIsDeliver = async (e, index) => {
     const tabModel = [...tabs];
-    const fee = await fetchShippingFee(tabModel[index].provinceId);
-    tabModel[index] = { ...tabModel[index], isDeliver: e, feeDelivery: fee };
+    const fee =
+      e === DELIVERY_STATUS.YES
+        ? await fetchShippingFee(tabModel[index].provinceId)
+        : 0;
+    tabModel[index] = {
+      ...tabModel[index],
+      isDeliver: e,
+      feeDelivery: fee,
+    };
     setTabs(tabModel);
   };
-  function formatCurrencyVND(amount) {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount);
-  }
+  const closeModalBill = () => {
+    setOpenModalBill(false);
+    closeTab(tabIdPayment);
+  };
   return (
     <div>
       <Row>
@@ -952,7 +1002,8 @@ const OrderCounter = () => {
                         <Row align={"middle"} gutter={[16, 16]}>
                           <Col span={6}>
                             <p style={{ fontWeight: "500", marginBottom: 0 }}>
-                              Thanh toán:
+                              Thanh toán:{" "}
+                              <span style={{ color: "red" }}>(*)</span>
                             </p>
                           </Col>
                           <Col span={18}>
@@ -974,7 +1025,9 @@ const OrderCounter = () => {
                         <Col span={24}>
                           <Row align={"middle"} gutter={[16, 16]}>
                             <Col span={6}>
-                              <p style={{ fontWeight: "500" }}>Giao hàng: </p>
+                              <p style={{ fontWeight: "500", marginBottom: 0 }}>
+                                Giao hàng:{" "}
+                              </p>
                             </Col>
                             <Col span={18}>
                               <Select
@@ -1065,13 +1118,24 @@ const OrderCounter = () => {
               </Row>
               <br />
               <Col span={24} style={{ textAlign: "right" }}>
+                <BillPopUp
+                  infoBill={tab}
+                  openModal={openModalBill}
+                  closeModal={closeModalBill}
+                />
                 <PaymentType
                   callback={onCreateOrder}
-                  amount={tab.totalPrice + tab.feeDelivery - tab.discount}
+                  amount={
+                    tab.totalPrice +
+                    (tab.feeDelivery || 0) -
+                    (tab.discount || 0)
+                  }
                   paymentId={tab.paymentId}
                   deliveryId={tab.delevryId}
                   products={tab.products}
                   tabIds={tab.id}
+                  phoneNumber={tab.userModel?.phoneNumber}
+                  email={tab.userModel?.email}
                 />
               </Col>
             </>

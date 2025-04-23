@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Button, Select, Space, Table, Menu } from "antd";
 import useProduct from "@api/useProduct";
 import { toast } from "react-toastify";
@@ -10,6 +10,9 @@ import useCategory from "@api/useCategory";
 import useType from "@api/useType";
 
 import CommonPopup from "./../Common/CommonPopup";
+import { getMediaUrl } from "@constants/commonFunctions";
+import { Upload } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
 
 function ProductManager() {
   function formatCurrencyVND(amount) {
@@ -19,7 +22,7 @@ function ProductManager() {
     }).format(amount);
   }
 
-  const { getList, changeStatus } = useProduct();
+  const { getList, changeStatus, uploadExcelProduct } = useProduct();
   const { getListType } = useType();
   const { getListCategory } = useCategory();
 
@@ -171,7 +174,11 @@ function ProductManager() {
       key: "images",
       render: (_, record) => (
         <img
-          src={Array.isArray(record.images) ? record.images[0] : "href"}
+          src={
+            Array.isArray(record.images)
+              ? getMediaUrl(record.images[0])
+              : "href"
+          }
           style={{ width: "65px", height: "auto", borderRadius: "10px" }}
         />
       ),
@@ -243,7 +250,7 @@ function ProductManager() {
 
     // },
     {
-      title: "Action",
+      title: "Thao tác",
       key: "action",
       render: (_, record) => (
         <Space>
@@ -331,6 +338,19 @@ function ProductManager() {
     }));
   };
 
+  const handleUploadExcel = useCallback(({ file }) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    uploadExcelProduct(formData).then((res) => {
+      if (res.success) {
+        toast.success("Upload file success");
+        fetchData();
+      } else {
+        toast.error(`${file.name} file upload failed.`);
+      }
+    });
+  }, []);
+
   return (
     <>
       <CommonPopup
@@ -362,7 +382,7 @@ function ProductManager() {
           </Col>
           <Col span={8} style={{ textAlign: "right" }}>
             <Row justify="end" gutter={[16, 16]}>
-              <Col span={12}>
+              <Col span={8}>
                 <Button
                   type="button"
                   value="small"
@@ -396,13 +416,34 @@ function ProductManager() {
                   Thiết lập lại
                 </Button>
               </Col>
-              <Col span={12}>
+              <Col span={8}>
                 <AddProduct
                   fetchData={fetchData}
                   modelItem={null}
                   textButton={"Thêm mới"}
                   isStyle={true}
                 />
+              </Col>
+              <Col span={8}>
+                <Upload
+                  style={{ width: "100%" }}
+                  customRequest={handleUploadExcel}
+                  onRemove={false}
+                  showUploadList={false}
+                >
+                  <Button
+                    icon={<UploadOutlined />}
+                    style={{
+                      alignItems: "center",
+                      background: "#2596be",
+                      marginBottom: "24px",
+                      color: "white",
+                      width: "100%",
+                    }}
+                  >
+                    Import excel
+                  </Button>
+                </Upload>
               </Col>
             </Row>
           </Col>

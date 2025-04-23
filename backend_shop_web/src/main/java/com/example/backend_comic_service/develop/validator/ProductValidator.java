@@ -2,6 +2,7 @@ package com.example.backend_comic_service.develop.validator;
 
 import com.example.backend_comic_service.develop.entity.ProductEntity;
 import com.example.backend_comic_service.develop.model.model.ProductModel;
+import com.example.backend_comic_service.develop.model.request.product.ProductRequest;
 import com.example.backend_comic_service.develop.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,7 +14,7 @@ public class ProductValidator {
     @Autowired
     private ProductRepository productRepository;
 
-    public String validate(ProductModel productModel) {
+    public String validate(ProductRequest productModel) {
 
         if(productModel == null){
             return "Product is null";

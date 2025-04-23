@@ -36,6 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -111,7 +112,7 @@ public class UserServiceImpl implements IUserService {
                 }
                 if (Optional.ofNullable(model.getId()).orElse(0) == 0) {
                     entity.setCreatedBy(userCreate.getId());
-                    entity.setCreatedDate(Date.valueOf(LocalDate.now()));
+                    entity.setCreatedDate(LocalDateTime.now());
                 } else {
                     entity = userRepository.findUserEntitiesById(model.getId()).orElse(null);
                     if (entity == null) {
@@ -125,7 +126,7 @@ public class UserServiceImpl implements IUserService {
                     entity.setDateBirth(model.getDateBirth());
                 }
                 entity.setUpdatedBy(userCreate.getId());
-                entity.setUpdatedDate(Date.valueOf(LocalDate.now()));
+                entity.setUpdatedDate(LocalDateTime.now());
             } catch (Exception e) {
                 log.error(e.getMessage());
                 response.errorResponse(e.getMessage());
@@ -283,7 +284,7 @@ public class UserServiceImpl implements IUserService {
                 }
                 if (Optional.ofNullable(model.getId()).orElse(0) == 0) {
                     entity.setCreatedBy(userCreate.getId());
-                    entity.setCreatedDate(Date.valueOf(LocalDate.now()));
+                    entity.setCreatedDate(LocalDateTime.now());
                 } else {
                     entity = userRepository.findUserEntitiesById(model.getId()).orElse(null);
                     if (entity == null) {
@@ -297,7 +298,7 @@ public class UserServiceImpl implements IUserService {
                     entity.setDateBirth(model.getDateBirth());
                 }
                 entity.setUpdatedBy(userCreate.getId());
-                entity.setUpdatedDate(Date.valueOf(LocalDate.now()));
+                entity.setUpdatedDate(LocalDateTime.now());
             } catch (Exception e) {
                 log.error(e.getMessage());
                 response.errorResponse(e.getMessage());

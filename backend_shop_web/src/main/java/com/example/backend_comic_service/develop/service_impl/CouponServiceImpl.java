@@ -7,6 +7,7 @@ import com.example.backend_comic_service.develop.entity.UserEntity;
 import com.example.backend_comic_service.develop.model.base_response.BaseListResponseModel;
 import com.example.backend_comic_service.develop.model.base_response.BaseResponseModel;
 import com.example.backend_comic_service.develop.model.model.CouponModel;
+import com.example.backend_comic_service.develop.model.model.CouponRequest;
 import com.example.backend_comic_service.develop.model.model.DiscountModel;
 import com.example.backend_comic_service.develop.repository.CouponRepository;
 import com.example.backend_comic_service.develop.service.ICouponService;
@@ -40,7 +41,7 @@ public class CouponServiceImpl implements ICouponService {
     private AuthenticationService authenticationService;
 
     @Override
-    public BaseResponseModel<CouponModel> addOrChange(CouponModel model) {
+    public BaseResponseModel<CouponModel> addOrChange(CouponRequest model) {
         BaseResponseModel<CouponModel> response = new BaseResponseModel<>();
         try{
             String errorMessage = couponValidator.validate(model);
@@ -72,14 +73,14 @@ public class CouponServiceImpl implements ICouponService {
             }else{
                 modelEntity = model.toEntity();
                 modelEntity.setCreatedBy(userEntity.getId());
-                modelEntity.setCreatedDate(Date.valueOf(LocalDate.now()));
+                modelEntity.setCreatedDate(LocalDateTime.now());
             }
             modelEntity.setUpdated_by(userEntity.getId());
-            modelEntity.setUpdatedDate(Date.valueOf(LocalDate.now()));
+            modelEntity.setUpdatedDate(LocalDateTime.now());
             CouponEntity couponEntity = couponRepository.saveAndFlush(modelEntity);
                 if(couponEntity.getId() != null){
-                response.setData(model);
-                response.successResponse(model, "Update successful");
+                response.setData(couponEntity.toCouponModel());
+                response.successResponse(couponEntity.toCouponModel(), "Update successful");
                 return response;
             }
             response.errorResponse("Add or change Coupon failed");
@@ -205,6 +206,25 @@ public class CouponServiceImpl implements ICouponService {
                 return  response;
             }
             response.errorResponse("Coupon code is null");
+            return response;
+        }
+        catch (Exception e){
+            response.errorResponse(e.getMessage());
+            return response;
+        }
+    }
+
+    @Override
+    public BaseResponseModel<CouponModel> getCouponByCode(String code) {
+        BaseResponseModel<CouponModel> response = new BaseResponseModel<>();
+        try{
+            CouponEntity couponEntity = couponRepository.findByCode(code).orElse(null);
+            if(couponEntity == null){
+                response.errorResponse("Coupon not found");
+                return response;
+            }
+            CouponModel couponModel = couponEntity.toCouponModel();
+            response.successResponse(couponModel, "Success");
             return response;
         }
         catch (Exception e){

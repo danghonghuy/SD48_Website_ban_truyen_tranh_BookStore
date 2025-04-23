@@ -53,7 +53,7 @@ const SidebarDashboard = () => {
                   className={isActiveMenu('order-counter') ? 'selected-item' : ''}
                   style={{ fontSize: "15px" , fontWeight: "bold"}}
                   active={isActiveMenu('order-counter')}> Bán hàng tại quầy </MenuItem>
-                <SubMenu label="Thống kê" style={{ fontSize: "15px", fontWeight: "bold" }} >
+                {/* <SubMenu label="Thống kê" style={{ fontSize: "15px", fontWeight: "bold" }} >
                   <MenuItem
                     // component={<Link to={'/dashboard/order'} className="sidebar-link" aria-expanded="false" ></Link>}
                     onClick={() => handleMenuClick('order')}
@@ -66,7 +66,7 @@ const SidebarDashboard = () => {
                     className={isActiveMenu('rollback-order') ? 'selected-item' : ''}
                     style={{ fontSize: "15px" }}
                     active={isActiveMenu('rollback-order')}> Đánh giá sản phẩm </MenuItem>
-                </SubMenu>
+                </SubMenu> */}
                 <SubMenu label="Quản lý sản phẩm" style={{ fontSize: "15px", fontWeight: "bold" }} >
                   <MenuItem
                     component={<Link to={'/dashboard/product'} className="sidebar-link" aria-expanded="false" ></Link>}

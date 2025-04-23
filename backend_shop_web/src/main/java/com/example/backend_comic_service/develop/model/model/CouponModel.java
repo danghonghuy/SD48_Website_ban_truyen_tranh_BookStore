@@ -1,6 +1,8 @@
 package com.example.backend_comic_service.develop.model.model;
 
 import com.example.backend_comic_service.develop.entity.CouponEntity;
+import com.example.backend_comic_service.develop.utils.Common;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import jakarta.persistence.Column;
@@ -8,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.sql.Date;
 import java.time.LocalDateTime;
@@ -29,11 +32,20 @@ public class CouponModel {
     private Integer status;
     private Integer isDelete;
     private Integer maxValue;
+    @DateTimeFormat(pattern = Common.FORMAT_DD_MM_YYYY_TIME)
+    @JsonFormat(pattern = Common.FORMAT_DD_MM_YYYY_TIME, timezone = "Asia/Ho_Chi_Minh")
     private LocalDateTime dateStart;
+
+    @DateTimeFormat(pattern = Common.FORMAT_DD_MM_YYYY_TIME)
+    @JsonFormat(pattern = Common.FORMAT_DD_MM_YYYY_TIME, timezone = "Asia/Ho_Chi_Minh")
     private LocalDateTime dateEnd;
-    private  Date createdDate;
+    @DateTimeFormat(pattern = Common.FORMAT_DD_MM_YYYY_TIME)
+    @JsonFormat(pattern = Common.FORMAT_DD_MM_YYYY_TIME, timezone = "Asia/Ho_Chi_Minh")
+    private  LocalDateTime createdDate;
     private Integer createdBy;
-    private  Date updatedDate;
+    @DateTimeFormat(pattern = Common.FORMAT_DD_MM_YYYY_TIME)
+    @JsonFormat(pattern = Common.FORMAT_DD_MM_YYYY_TIME, timezone = "Asia/Ho_Chi_Minh")
+    private  LocalDateTime updatedDate;
     private  Integer updated_by;
     private Integer quantityUsed;
     private Long dateStartEpochTime;

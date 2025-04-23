@@ -1,10 +1,11 @@
 package com.example.backend_comic_service.develop.service_impl;
 
 import com.example.backend_comic_service.develop.constants.CouponTypeEnum;
-import com.example.backend_comic_service.develop.constants.OrderStatusEnum;
+import com.example.backend_comic_service.develop.enums.OrderStatusEnum;
 import com.example.backend_comic_service.develop.constants.ProductDiscountStatusEnum;
 import com.example.backend_comic_service.develop.constants.TypeDiscountEnum;
 import com.example.backend_comic_service.develop.entity.*;
+import com.example.backend_comic_service.develop.enums.YesNoEnum;
 import com.example.backend_comic_service.develop.model.base_response.BaseListResponseModel;
 import com.example.backend_comic_service.develop.model.base_response.BaseResponseModel;
 import com.example.backend_comic_service.develop.model.mapper.OrderGetListMapper;
@@ -20,6 +21,7 @@ import com.example.backend_comic_service.develop.utils.AuthenticationService;
 import com.example.backend_comic_service.develop.utils.HashService;
 import com.example.backend_comic_service.develop.utils.UtilService;
 import com.example.backend_comic_service.develop.validator.OrderValidator;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -38,6 +40,8 @@ import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
+
+@Transactional
 @Service
 @Slf4j
 public class OrderServiceImpl implements IOrderService {
@@ -111,9 +115,9 @@ public class OrderServiceImpl implements IOrderService {
                         return response;
                     }
                     entity.setCreatedBy(userCreate.getId());
-                    entity.setCreatedDate(Date.valueOf(LocalDate.now()));
+                    entity.setCreatedDate(LocalDateTime.now());
                     entity.setUpdatedBy(userCreate.getId());
-                    entity.setUpdatedDate(Date.valueOf(LocalDate.now()));
+                    entity.setUpdatedDate(LocalDateTime.now());
                     entity.setUserName(model.getUserModel().getPhoneNumber());
                 } catch (Exception e) {
                     log.error(e.getMessage());
@@ -237,13 +241,22 @@ public class OrderServiceImpl implements IOrderService {
             orderEntity.setEmployee(userCreate);
             orderEntity.setUser(userEntity);
             orderEntity.setDeliveryType(deliveryEntity);
-            orderEntity.setCreatedDate(Date.valueOf(LocalDate.now()));
-            orderEntity.setUpdatedDate(Date.valueOf(LocalDate.now()));
+            orderEntity.setCreatedDate(LocalDateTime.now());
+            orderEntity.setUpdatedDate(LocalDateTime.now());
             orderEntity.setTotalPrice(sumPriceOrder);
             orderEntity.setType(model.getType());
             orderEntity.setStage(model.getStage());
-            orderEntity.setStatus(model.getStatus());
-            orderEntity.setOrderDate(Date.valueOf(LocalDate.now()));
+            if (model.getType() == 2) {
+                orderEntity.setStatus(OrderStatusEnum.ORDER_STATUS_ACCEPT.getValue());
+            } else {
+                if (YesNoEnum.NO.equals(model.getIsDeliver())) {
+                    orderEntity.setStatus(OrderStatusEnum.ORDER_STATUS_ACCEPT.getValue());
+                } else {
+                    orderEntity.setStatus(OrderStatusEnum.ORDER_STATUS_WAITING_ACCEPT.getValue());
+                }
+            }
+
+            orderEntity.setOrderDate(LocalDate.now());
             OrderEntity savedOrder = orderRepository.save(orderEntity);
             if (Optional.ofNullable(savedOrder.getId()).orElse(0) != 0) {
                 int bulkInsert = orderDetailService.bulkInsertOrderDetail(model.getOrderDetailModels(), savedOrder, userCreate);
@@ -264,8 +277,16 @@ public class OrderServiceImpl implements IOrderService {
                         LogActionOrderEntity logActionOrderEntity = new LogActionOrderEntity();
                         logActionOrderEntity.setUser(userCreate);
                         logActionOrderEntity.setOrder(savedOrder);
-                        logActionOrderEntity.setStatusId(model.getDeliveryType()  == 1 ? OrderStatusEnum.ORDER_STATUS_SUCCESS : OrderStatusEnum.ORDER_STATUS_WAITING_ACCEPT);
-                        logActionOrderEntity.setCreatedDate(Date.valueOf(LocalDate.now()));
+                        if (model.getType() == 2) {
+                            logActionOrderEntity.setStatusId(OrderStatusEnum.ORDER_STATUS_ACCEPT.getValue());
+                        } else {
+                            if (YesNoEnum.NO.equals(model.getIsDeliver())) {
+                                logActionOrderEntity.setStatusId(OrderStatusEnum.ORDER_STATUS_ACCEPT.getValue());
+                            } else {
+                                logActionOrderEntity.setStatusId(OrderStatusEnum.ORDER_STATUS_WAITING_ACCEPT.getValue());
+                            }
+                        }
+                        logActionOrderEntity.setCreatedDate(LocalDateTime.now());
                         logActionOrderEntity.setName("");
                         LogActionOrderEntity logActionOrder = logActionOrderRepository.saveAndFlush(logActionOrderEntity);
                         if(logActionOrder.getId() == null){
@@ -277,10 +298,10 @@ public class OrderServiceImpl implements IOrderService {
                     if(model.getId() == null){
                         LogPaymentHistoryEntity logPaymentHistoryEntity = new LogPaymentHistoryEntity();
                         logPaymentHistoryEntity.setUser(userCreate);
-                        logPaymentHistoryEntity.setPayment(paymentEntity);
+                        logPaymentHistoryEntity.setOrder(savedOrder);
                         logPaymentHistoryEntity.setStatus(1);
                         logPaymentHistoryEntity.setDescription("");
-                        logPaymentHistoryEntity.setCreatedDate(Date.valueOf(LocalDate.now()));
+                        logPaymentHistoryEntity.setCreatedDate(LocalDateTime.now());
                         logPaymentHistoryEntity.setAmount(savedOrder.getTotalPrice());
                         LogPaymentHistoryEntity logPaymentHistory = logPaymentHistoryRepository.saveAndFlush(logPaymentHistoryEntity);
                         if(logPaymentHistory.getId() == null){
@@ -315,7 +336,7 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public BaseListResponseModel<List<OrderGetListMapper>> getListOrders(Integer userId, Integer paymentId, Integer employeeId, Integer status, Integer stage, Integer type, Integer startPrice, Integer endPrice, Date startDate, Date endDate, Pageable pageable) {
+    public BaseListResponseModel<List<OrderGetListMapper>> getListOrders(Integer userId, Integer paymentId, Integer employeeId, Integer status, Integer stage, Integer type, Integer startPrice, Integer endPrice, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
         BaseListResponseModel<List<OrderGetListMapper>> response = new BaseListResponseModel<>();
         try{
             Page<OrderGetListMapper> orderGetListMappers = orderRepository.getListOrder(userId, paymentId, employeeId, status, stage, type, startPrice, endPrice, startDate, endDate, pageable);
@@ -351,7 +372,7 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public BaseResponseModel<Integer> updateStatus(Integer id, Integer status, String description) {
+    public BaseResponseModel<Integer> updateStatus(Integer id, OrderStatusEnum status, String description) {
         BaseResponseModel<Integer> response = new BaseResponseModel<>();
         try{
             OrderEntity orderEntity = orderRepository.findById(id).orElse(null);
@@ -370,16 +391,17 @@ public class OrderServiceImpl implements IOrderService {
             if(status.equals(OrderStatusEnum.ORDER_STATUS_DELIVERY)){
                 logActionOrderEntity.setUser(userEntity);
                 logActionOrderEntity.setOrder(orderEntity);
-                logActionOrderEntity.setStatusId(OrderStatusEnum.ORDER_STATUS_ACCEPT);
-                logActionOrderEntity.setCreatedDate(Date.valueOf(LocalDate.now()));
+                logActionOrderEntity.setStatusId(OrderStatusEnum.ORDER_STATUS_ACCEPT.getValue());
+                logActionOrderEntity.setCreatedDate(LocalDateTime.now());
                 logActionOrderEntity.setDescription("Tiếp nhận đơn hàng");
                 logActionOrderEntities.add(logActionOrderEntity);
 
                 logActionOrderEntity = new LogActionOrderEntity();
                 logActionOrderEntity.setUser(userEntity);
                 logActionOrderEntity.setOrder(orderEntity);
-                logActionOrderEntity.setStatusId(OrderStatusEnum.ORDER_STATUS_DELIVERY);
-                logActionOrderEntity.setCreatedDate(Date.valueOf(LocalDate.now()));
+                logActionOrderEntity.setStatusId(OrderStatusEnum.ORDER_STATUS_DELIVERY.getValue());
+                orderEntity.setStatus(OrderStatusEnum.ORDER_STATUS_DELIVERY.getValue());
+                logActionOrderEntity.setCreatedDate(LocalDateTime.now());
                 logActionOrderEntity.setDescription("Chuyển cho đơn vị vận chuyển");
                 logActionOrderEntities.add(logActionOrderEntity);
 
@@ -388,7 +410,7 @@ public class OrderServiceImpl implements IOrderService {
                     response.errorResponse("Something went wrong");
                     return response;
                 }
-                orderRepository.updateOrderStatus(OrderStatusEnum.ORDER_STATUS_DELIVERY, id);
+                orderRepository.save(orderEntity);
                 Executors.newSingleThreadExecutor().submit(() -> {
                     try {
                         couponRepository.updateQuantity(id);
@@ -399,19 +421,55 @@ public class OrderServiceImpl implements IOrderService {
                 response.successResponse(id, "Update status successful");
                 return response;
             }
+
+            if (status.equals(OrderStatusEnum.ORDER_STATUS_FINISH_DELIVERY)) {
+                logActionOrderEntity.setUser(userEntity);
+                logActionOrderEntity.setOrder(orderEntity);
+                logActionOrderEntity.setStatusId(OrderStatusEnum.ORDER_STATUS_FINISH_DELIVERY.getValue());
+                logActionOrderEntity.setCreatedDate(LocalDateTime.now());
+                logActionOrderEntity.setDescription(OrderStatusEnum.ORDER_STATUS_FINISH_DELIVERY.getDescription());
+                logActionOrderEntities.add(logActionOrderEntity);
+
+                logActionOrderEntity = new LogActionOrderEntity();
+                logActionOrderEntity.setUser(userEntity);
+                logActionOrderEntity.setOrder(orderEntity);
+                logActionOrderEntity.setStatusId(OrderStatusEnum.ORDER_STATUS_FINISH_DELIVERY.getValue());
+                orderEntity.setStatus(OrderStatusEnum.ORDER_STATUS_FINISH_DELIVERY.getValue());
+                logActionOrderEntity.setCreatedDate(LocalDateTime.now());
+                logActionOrderEntity.setDescription("Đơn vị vận chuyển đang vận chuyển");
+                logActionOrderEntities.add(logActionOrderEntity);
+
+                logActionOrder = logActionOrderRepository.saveAllAndFlush(logActionOrderEntities);
+                if (logActionOrder.isEmpty()) {
+                    response.errorResponse("Something went wrong");
+                    return response;
+                }
+                orderRepository.save(orderEntity);
+                Executors.newSingleThreadExecutor().submit(() -> {
+                    try {
+                        couponRepository.updateQuantity(id);
+                    } catch (Exception e) {
+                        log.error(e.getMessage());
+                    }
+                });
+                response.successResponse(id, "Update status successful");
+                return response;
+            }
+
             if(status.equals(OrderStatusEnum.ORDER_STATUS_SUCCESS)){
                 logActionOrderEntity.setUser(userEntity);
                 logActionOrderEntity.setOrder(orderEntity);
-                logActionOrderEntity.setStatusId(OrderStatusEnum.ORDER_STATUS_FINISH_DELIVERY);
-                logActionOrderEntity.setCreatedDate(Date.valueOf(LocalDate.now()));
+                logActionOrderEntity.setStatusId(OrderStatusEnum.ORDER_STATUS_FINISH_DELIVERY.getValue());
+                logActionOrderEntity.setCreatedDate(LocalDateTime.now());
                 logActionOrderEntity.setDescription("Giao hàng thành công");
                 logActionOrderEntities.add(logActionOrderEntity);
 
                 logActionOrderEntity = new LogActionOrderEntity();
                 logActionOrderEntity.setUser(userEntity);
                 logActionOrderEntity.setOrder(orderEntity);
-                logActionOrderEntity.setStatusId(OrderStatusEnum.ORDER_STATUS_SUCCESS);
-                logActionOrderEntity.setCreatedDate(Date.valueOf(LocalDate.now()));
+                logActionOrderEntity.setStatusId(OrderStatusEnum.ORDER_STATUS_SUCCESS.getValue());
+                orderEntity.setStatus(OrderStatusEnum.ORDER_STATUS_SUCCESS.getValue());
+                logActionOrderEntity.setCreatedDate(LocalDateTime.now());
                 logActionOrderEntity.setDescription("Hoàn thành đơn hàng");
                 logActionOrderEntities.add(logActionOrderEntity);
                 logActionOrder = logActionOrderRepository.saveAllAndFlush(logActionOrderEntities);
@@ -419,18 +477,19 @@ public class OrderServiceImpl implements IOrderService {
                     response.errorResponse("Something went wrong");
                     return response;
                 }
-                orderRepository.updateOrderStatus(OrderStatusEnum.ORDER_STATUS_SUCCESS, id);
+                orderRepository.save(orderEntity);
                 response.successResponse(id, "Update status successful");
                 return response;
             }
 
             if(status.equals(OrderStatusEnum.ORDER_STATUS_CUSTOMER_CANCEL) || status.equals(OrderStatusEnum.ORDER_STATUS_CUSTOMER_CANCEL_RECEIVE)){
-                 logActionOrderEntity = new LogActionOrderEntity();
+                logActionOrderEntity = new LogActionOrderEntity();
                 logActionOrderEntity.setUser(userEntity);
                 logActionOrderEntity.setOrder(orderEntity);
-                logActionOrderEntity.setStatusId(status.equals(OrderStatusEnum.ORDER_STATUS_CUSTOMER_CANCEL) ?OrderStatusEnum.ORDER_STATUS_CUSTOMER_CANCEL : OrderStatusEnum.ORDER_STATUS_CUSTOMER_CANCEL_RECEIVE);
-                logActionOrderEntity.setCreatedDate(Date.valueOf(LocalDate.now()));
+                logActionOrderEntity.setStatusId(status.equals(OrderStatusEnum.ORDER_STATUS_CUSTOMER_CANCEL) ?OrderStatusEnum.ORDER_STATUS_CUSTOMER_CANCEL.getValue() : OrderStatusEnum.ORDER_STATUS_CUSTOMER_CANCEL_RECEIVE.getValue());
+                logActionOrderEntity.setCreatedDate(LocalDateTime.now());
                 logActionOrderEntity.setDescription(description);
+                orderEntity.setStatus(status.equals(OrderStatusEnum.ORDER_STATUS_CUSTOMER_CANCEL) ?OrderStatusEnum.ORDER_STATUS_CUSTOMER_CANCEL.getValue() : OrderStatusEnum.ORDER_STATUS_CUSTOMER_CANCEL_RECEIVE.getValue());
                 LogActionOrderEntity logActionOrderEntity1 = logActionOrderRepository.saveAndFlush(logActionOrderEntity);
                 if(logActionOrderEntity1.getId() == null){
                     response.errorResponse("Something went wrong");
