@@ -7,6 +7,8 @@ import com.example.backend_comic_service.develop.model.model.CouponRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ICouponService {
@@ -14,7 +16,7 @@ public interface ICouponService {
     BaseResponseModel<CouponModel> addOrChange(CouponRequest request);
     BaseResponseModel<CouponModel> getCouponById(Integer id);
     BaseResponseModel<Integer> delete(Integer id, Integer status);
-    BaseListResponseModel<List<CouponModel>> getListCoupon(Date startDate, Date endDate, Integer minValue, Integer maxValue, String keySearch, Integer status, Pageable pageable);
+    BaseListResponseModel<List<CouponModel>> getListCoupon(LocalDateTime startDate, LocalDateTime endDate, Integer minValue, Integer maxValue, String keySearch, Integer status, Pageable pageable);
     BaseResponseModel<String> generateCouponCode();
     BaseResponseModel<Double> useCoupon(String couponCode, Double sumPrice);
 
