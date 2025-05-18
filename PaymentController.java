@@ -11,6 +11,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
+<<<<<<< HEAD
+=======
+import java.math.BigDecimal;
+>>>>>>> master
 import java.util.List;
 
 @RestController
@@ -49,4 +53,15 @@ public class PaymentController {
         return paymentService.generateCode();
     }
 
+<<<<<<< HEAD
+=======
+    @GetMapping("/get-url-payment")
+    public BaseResponseModel<String> getUrlPayment(
+            @RequestParam(value = "orderId") String orderId,
+            @RequestParam(value = "amount") BigDecimal amount
+    ) {
+        return paymentService.payWithMomo(orderId, amount);
+    }
+
+>>>>>>> master
 }
