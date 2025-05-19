@@ -1,0 +1,18 @@
+services:
+  app:
+    image: sha256:3d2beb29cd91feebed88f02e040589f208d3f5d1c13978404d98d1376012acd0
+    networks:
+      - my-network
+    depends_on:
+      - db
+  db:
+    image: mcr.microsoft.com/mssql/server
+    networks:
+      - my-network
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Admin1234
+    ports:
+      - "1433:1433"
+networks:
+  my-network:
