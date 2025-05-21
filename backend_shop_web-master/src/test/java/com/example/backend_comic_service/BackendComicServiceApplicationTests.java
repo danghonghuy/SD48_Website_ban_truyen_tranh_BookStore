@@ -10,8 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 class BackendComicServiceApplicationTests {
 
 	@Autowired
-	CouponSchedule resetDiscountSchedule;
-	@Test
+	CouponSchedule resetDiscountSchedule;	@Test
 	void contextLoads() {
 		resetDiscountSchedule.resetCouponOutDate();
 	}
