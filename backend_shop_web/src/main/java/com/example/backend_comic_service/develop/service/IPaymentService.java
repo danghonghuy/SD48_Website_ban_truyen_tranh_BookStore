@@ -5,6 +5,7 @@ import com.example.backend_comic_service.develop.model.base_response.BaseRespons
 import com.example.backend_comic_service.develop.model.model.PaymentModel;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface IPaymentService {
@@ -13,4 +14,6 @@ public interface IPaymentService {
     BaseListResponseModel<List<PaymentModel>> getAllPayments(String keySearch, Integer status,  Pageable pageable);
     BaseResponseModel<Integer> delete(Integer id, Integer status);
     BaseResponseModel<String> generateCode();
+
+    BaseResponseModel<String> payWithMomo(String orderId, BigDecimal amount);
 }
