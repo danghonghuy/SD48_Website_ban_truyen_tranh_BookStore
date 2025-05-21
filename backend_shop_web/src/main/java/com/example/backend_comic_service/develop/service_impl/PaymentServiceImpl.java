@@ -11,16 +11,24 @@ import com.example.backend_comic_service.develop.utils.AuthenticationService;
 import com.example.backend_comic_service.develop.utils.UtilService;
 import com.example.backend_comic_service.develop.validator.PaymentValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,6 +38,25 @@ public class PaymentServiceImpl implements IPaymentService {
     private final PaymentValidator paymentValidator;
     private final UtilService utilService;
     private final AuthenticationService authenticationService;
+
+    @Value("${momo.endpoint}")
+    private String endPoint;
+
+    @Value("${momo.partnerCode}")
+    private String partnerCode;
+
+    @Value("${momo.accessKey}")
+    private String accessKey;
+
+    @Value("${momo.secretKey}")
+    private String secretKey;
+
+    @Value("${ipUrl}")
+    private String ipnUrl;
+
+    @Value("${redirectUrl}")
+    private String redirectUrl;
+
     @Autowired
     public PaymentServiceImpl(PaymentRepository paymentRepository, PaymentValidator paymentValidator, UtilService utilService, AuthenticationService authenticationService) {
         this.paymentRepository = paymentRepository;
@@ -51,7 +78,7 @@ public class PaymentServiceImpl implements IPaymentService {
             if((paymentModel.getId() != null) && (paymentModel.getId() > 0)){
                  paymentEntity = paymentRepository.findById(paymentModel.getId()).orElse(null);
                 if(paymentEntity == null){
-                    response.errorResponse("Payment not exist to update");
+                    response.errorResponse("Phương thức thanh toán không tồn tại để cập nhật");
                     return response;
                 }
                 paymentEntity.setName(paymentModel.getName());
@@ -62,7 +89,7 @@ public class PaymentServiceImpl implements IPaymentService {
 
             UserEntity userEntity = authenticationService.authenToken();
             if(userEntity == null){
-                response.errorResponse("Authentication failed");
+                response.errorResponse("Xác thực thất bại");
                 return response;
             }
             if(Optional.ofNullable(paymentModel.getId()).orElse(0) <= 0){
@@ -74,16 +101,16 @@ public class PaymentServiceImpl implements IPaymentService {
             PaymentEntity savedPaymentEntity = paymentRepository.saveAndFlush(paymentEntity);
             if(savedPaymentEntity.getId() != null){
                  if(paymentModel.getId() != null){
-                     response.successResponse(paymentModel, "Update successful");
+                     response.successResponse(paymentModel, "Cập nhật thành công");
                  }else{
-                     response.successResponse(paymentModel, "Add successful");
+                     response.successResponse(paymentModel, "Thêm thành công");
                  }
                  return response;
             }else{
                 if(paymentModel.getId() != null){
-                    response.successResponse(null, "Update failed");
+                    response.successResponse(null, "Cập nhật thất bại");
                 }else{
-                    response.successResponse(null, "Add failed");
+                    response.successResponse(null, "Thêm thất bại");
                 }
                 return response;
             }
@@ -100,11 +127,11 @@ public class PaymentServiceImpl implements IPaymentService {
         try{
             PaymentEntity paymentEntity = paymentRepository.findById(id).orElse(null);
             if(paymentEntity == null){
-                response.errorResponse("Payment not exist to update");
+                response.errorResponse("Phương thức thanh toán không tồn tại");
                 return response;
             }
             PaymentModel paymentModel = paymentEntity.toModel();
-            response.successResponse(paymentModel, "Get successful");
+            response.successResponse(paymentModel, "Lấy thành công");
             return response;
         }
         catch (Exception e){
@@ -119,11 +146,11 @@ public class PaymentServiceImpl implements IPaymentService {
         try{
             Page<PaymentEntity> paymentEntities = paymentRepository.getListPayments(keySearch, status, pageable);
             if(paymentEntities.getContent().isEmpty()){
-                response.successResponse(null, "Payment list is empty");
+                response.successResponse(null, "Danh sách phương thức thanh toán trống");
                 return response;
             }
             List<PaymentModel> paymentModels = paymentEntities.getContent().stream().map(PaymentEntity::toModel).toList();
-            response.successResponse(paymentModels, "Get successful");
+            response.successResponse(paymentModels, "Lấy thành công");
             response.setPageIndex(pageable.getPageNumber());
             response.setPageSize(pageable.getPageSize());
             response.setTotalCount((int) paymentEntities.getTotalElements());
@@ -141,11 +168,11 @@ public class PaymentServiceImpl implements IPaymentService {
         try{
             PaymentEntity paymentEntity = paymentRepository.findById(id).orElse(null);
             if(paymentEntity == null){
-                response.errorResponse("Payment not exist to update");
+                response.errorResponse("Phương thức thanh toán không tồn tại");
                 return response;
             }
             paymentRepository.updatePayment(paymentEntity.getId(), status);
-            response.successResponse(id, "Delete successful");
+            response.successResponse(id, "Xóa thành công");
             return response;
         }
         catch (Exception e){
@@ -161,7 +188,7 @@ public class PaymentServiceImpl implements IPaymentService {
             Integer idLastest =  paymentRepository.getIdGenerateCode();
             idLastest = idLastest == null ? 1 : (idLastest + 1);
             String codeGender = utilService.getGenderCode("PAY", idLastest);
-            response.successResponse(codeGender, "Generate discount code success");
+            response.successResponse(codeGender, "Tạo mã thành công");
             return response;
         }
         catch (Exception e){
@@ -169,4 +196,74 @@ public class PaymentServiceImpl implements IPaymentService {
             return response;
         }
     }
+
+    @Override
+    public BaseResponseModel<String> payWithMomo(String orderId, BigDecimal amount) {
+
+        BaseResponseModel<String> result  = new BaseResponseModel<>();
+
+        String orderInfo = "Payment";
+        String extraData = "";
+        String requestId = String.valueOf(System.currentTimeMillis() + new Random().nextInt(999 - 111 + 1) + 111);
+        String requestType = "captureWallet";
+        String rawHash = "accessKey=" + accessKey +
+                "&amount=" + amount.longValue() +
+                "&extraData=" + extraData +
+                "&ipnUrl=" + ipnUrl +
+                "&orderId=" + orderId +
+                "&orderInfo=" + orderInfo +
+                "&partnerCode=" + partnerCode +
+                "&redirectUrl=" + redirectUrl +
+                "&requestId=" + requestId +
+                "&requestType=" + requestType;
+        String signature = hmacSHA256(rawHash, secretKey);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("partnerCode", partnerCode);
+        data.put("partnerName", "Test");
+        data.put("storeId", "MomoTestStore");
+        data.put("requestId", requestId);
+        data.put("amount", amount);
+        data.put("orderId", orderId);
+        data.put("orderInfo", orderInfo);
+        data.put("redirectUrl", redirectUrl);
+        data.put("ipnUrl", ipnUrl);
+        data.put("lang", "vi");
+        data.put("extraData", extraData);
+        data.put("requestType", requestType);
+        data.put("signature", signature);
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(data, headers);
+
+        ResponseEntity<Map> response = restTemplate.postForEntity(endPoint, entity, Map.class);
+
+        Map<String, String> responseBody = response.getBody();
+
+        result.setMessage(responseBody.get("payUrl"));
+
+        return result;
+    }
+
+
+    private String hmacSHA256(String data, String key) {
+        try {
+            Mac mac = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(), "HmacSHA256");
+            mac.init(secretKeySpec);
+            byte[] rawHmac = mac.doFinal(data.getBytes());
+
+            StringBuilder sb = new StringBuilder();
+            for (byte b : rawHmac) {
+                sb.append(String.format("%02x", b));
+            }
+
+            return sb.toString();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to calculate HMAC SHA-256", e);
+        }
+    }
+
 }
