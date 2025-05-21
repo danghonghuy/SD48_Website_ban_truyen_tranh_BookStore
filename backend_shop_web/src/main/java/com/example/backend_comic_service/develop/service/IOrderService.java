@@ -15,5 +15,5 @@ public interface IOrderService {
     BaseResponseModel<Integer> createOrder(OrderModel model);
     BaseListResponseModel<List<OrderGetListMapper>> getListOrders(Integer userId, Integer paymentId, Integer employeeId, Integer status, Integer stage, Integer type, Integer startPrice, Integer endPrice, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
     BaseResponseModel<String> generateCode();
-    BaseResponseModel<Integer> updateStatus(Integer id, OrderStatusEnum status, String description);
+    BaseResponseModel<Integer> updateStatus(Integer id, OrderStatusEnum status, String note);
 }

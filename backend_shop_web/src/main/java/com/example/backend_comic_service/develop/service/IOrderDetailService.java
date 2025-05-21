@@ -11,7 +11,7 @@ import com.example.backend_comic_service.develop.model.model.OrderModel;
 import java.util.List;
 
 public interface IOrderDetailService {
-    int bulkInsertOrderDetail(List<OrderDetailModel> models, OrderEntity orderEntity, UserEntity userEntity);
+    int bulkInsertOrderDetail(List<OrderDetailModel> models, OrderEntity orderEntity, UserEntity userEntity, Integer isChangeOrder);
     BaseListResponseModel<List<OrderDetailGetListMapper>> getListByOrderId(Integer orderIds);
     BaseResponseModel<OrderModel> getDetail(Integer id);
 }
