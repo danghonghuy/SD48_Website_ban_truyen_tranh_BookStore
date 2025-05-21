@@ -1,7 +1,6 @@
 package com.example.backend_comic_service.develop.schedule;
 
 import com.example.backend_comic_service.develop.constants.DiscountStatusEnum;
-import com.example.backend_comic_service.develop.constants.TypeDiscountEnum;
 import com.example.backend_comic_service.develop.repository.DiscountRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,16 +18,16 @@ public class DiscountSchedule {
         this.discountRepository = discountRepository;
     }
 
-    @Scheduled(cron = "0 0 12 * * ?")
-    public void resetDiscountSchedule(){
-       try{
-           System.out.println("--- Staring schedule ---");
-           discountRepository.resetDiscountProgram(DiscountStatusEnum.DISCOUNT_STATUS_EXPIRED);
-           System.out.println("--- End schedule ---");
-       }
-       catch (Exception e){
-           log.error(e.getMessage());
-           System.out.println("--- Schedule ending with fail error: " + e.getMessage() + " ---");
-       }
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void resetDiscountSchedule() {
+        try {
+            log.info("--- Staring resetDiscountSchedule ---");
+            discountRepository.resetDiscountProgram(DiscountStatusEnum.DISCOUNT_STATUS_EXPIRED);
+            discountRepository.imminentDiscountProgram(DiscountStatusEnum.DISCOUNT_STATUS_IMMINENT);
+            discountRepository.activeDiscountProgram(DiscountStatusEnum.DISCOUNT_STATUS_ACTIVE);
+            log.info("--- End resetDiscountSchedule ---");
+        } catch (Exception e) {
+            log.error("--- resetDiscountSchedule fail error: " + e.getMessage() + " ---");
+        }
     }
 }
