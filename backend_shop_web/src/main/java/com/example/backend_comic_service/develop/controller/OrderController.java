@@ -72,7 +72,7 @@ public class OrderController {
     @GetMapping("/change-status")
     public BaseResponseModel<Integer> changeStatus(@RequestParam(value = "id", required = false) Integer id,
                                              @RequestParam(value = "status",  required = false) OrderStatusEnum status,
-                                             @RequestParam(value = "description",  required = false) String description) {
-        return orderService.updateStatus(id, status, description);
+                                             @RequestParam(value = "note",  required = false) String note) {
+        return orderService.updateStatus(id, status, note);
     }
 }

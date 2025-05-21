@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -79,27 +80,44 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Integer> {
 
     @Query(value = "SELECT o.status as status, count(o.id) as totalCount \n" +
             "FROM orders o\n" +
-            "WHERE o.created_date >= DATEADD(DAY, -DATEPART(WEEKDAY, GETDATE()) + 1, GETDATE())\n" +
-            "  AND o.created_date < DATEADD(DAY, 7 - DATEPART(WEEKDAY, GETDATE()) + 1, GETDATE())\n" +
+            "WHERE o.updated_date >= DATEADD(DAY, -DATEPART(WEEKDAY, GETDATE()) + 1, GETDATE())\n" +
+            "  AND o.updated_date < DATEADD(DAY, 7 - DATEPART(WEEKDAY, GETDATE()) + 1, GETDATE())\n" +
             "group by status", nativeQuery = true)
     List<StatisticalOrdersDTO> getStatisticalWeek();
 
     @Query(value = "SELECT status as status, count(id) as totalCount \n" +
             "FROM orders \n" +
-            "WHERE CAST(created_date AS DATE) = CAST(GETDATE() AS DATE) " +
+            "WHERE CAST(updated_date AS DATE) = CAST(GETDATE() AS DATE) " +
             "group by status", nativeQuery = true)
     List<StatisticalOrdersDTO> getStatisticalToday();
 
     @Query(value = "SELECT status as status, count(id) as totalCount \n" +
             "FROM orders \n" +
-            "WHERE YEAR(created_date) = YEAR(GETDATE())\n" +
-            "  AND MONTH(created_date) = MONTH(GETDATE()) " +
+            "WHERE YEAR(updated_date) = YEAR(GETDATE())\n" +
+            "  AND MONTH(updated_date) = MONTH(GETDATE()) " +
             "group by status", nativeQuery = true)
     List<StatisticalOrdersDTO> getStatisticalMonth();
 
     @Query(value = "SELECT status as status, count(id) as totalCount \n" +
             "FROM orders \n" +
-            "WHERE YEAR(created_date) = YEAR(GETDATE())\n" +
+            "WHERE YEAR(updated_date) = YEAR(GETDATE())\n" +
             "group by status", nativeQuery = true)
     List<StatisticalOrdersDTO> getStatisticalYear();
+
+    @Modifying
+    @Transactional
+    @Query(value = "update orders set status = ?1, updated_date = getdate() where status = ?2 and type = ?3 and" +
+            " convert(date, updated_date) = convert(date, getdate())", nativeQuery = true)
+    void resetOrderInCounterOutDate(Integer statusTarget, Integer statusCondition , Integer type);
+
+    @Query(value = "SELECT o.status as status, count(o.id) as totalCount \n" +
+            "FROM orders o\n" +
+            "WHERE o.updated_date >= ?1 AND o.updated_date < ?2 \n" +
+            "group by status", nativeQuery = true)
+    List<StatisticalOrdersDTO> getStatisticalFromTo(LocalDateTime fromDate, LocalDateTime toDate);
+
+    @Transactional
+    @Modifying
+    @Query(value = "update orders set user_id = null, address_id = null where id = ?1", nativeQuery = true)
+    void updateAddress(Integer orderId);
 }
