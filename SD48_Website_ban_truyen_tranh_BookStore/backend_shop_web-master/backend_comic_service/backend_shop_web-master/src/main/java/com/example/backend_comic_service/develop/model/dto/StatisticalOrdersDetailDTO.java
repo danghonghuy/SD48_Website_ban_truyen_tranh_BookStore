@@ -1,0 +1,13 @@
+package com.example.backend_comic_service.develop.model.dto;
+
+import lombok.*;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@Data
+public class StatisticalOrdersDetailDTO {
+    private Long totalRevenue;
+    private Integer totalQuantity;
+}

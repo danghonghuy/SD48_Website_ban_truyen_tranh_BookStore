@@ -1,0 +1,15 @@
+create table shipping_fee
+(
+    point_source      varchar(10),
+    point_destination varchar(10),
+    fee               decimal,
+    status            tinyint,
+    created_date      datetime,
+    created_by        nvarchar(150),
+    updated_date      datetime,
+    updated_by        nvarchar(150),
+    fee_id            bigint identity
+        primary key
+)
+go
+
